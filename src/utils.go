@@ -1,7 +1,14 @@
+// The following folder consists of utility functions
+
+/*
+Functions in the file:
+* reader: reads and outputs file content as string
+* yaml_reader: reads YAML and outputs a yaml struct
+*/
+
 package main
 
 import (
-    "fmt"
     "os"
 )
 
@@ -11,9 +18,8 @@ func check(e error) {
     }
 }
 
-func reader() {
-
-    dat, err := os.ReadFile("../test_src/index.md")
+func reader(path string) []byte{
+    dat, err := os.ReadFile(path)
     check(err)
-    fmt.Print(string(dat))
+    return dat
 }
