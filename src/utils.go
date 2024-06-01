@@ -23,3 +23,15 @@ func reader(path string) []byte{
     check(err)
     return dat
 }
+
+func dump(path string, str string){
+    file, err := os.Create(path)
+    if(err != nil){
+        panic(err)
+    }
+    defer file.Close()
+    _, err = file.WriteString(str)
+    if(err != nil){
+        panic(err)
+    }
+}

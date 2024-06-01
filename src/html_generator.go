@@ -20,3 +20,7 @@ func mdToHTML(md []byte) []byte {
 
 	return markdown.Render(doc, renderer)
 }
+
+func index_html_generator(){
+	/*generates the home page*/
+}
