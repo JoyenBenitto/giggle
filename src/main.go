@@ -12,11 +12,11 @@ func main() {
     */
 
     config_yaml := flag.String("config_yaml",
-                                "./default_config.yaml", 
+                                "constants/default_config.yaml", 
                                 "Path to the config yaml")
 
     theme_yaml := flag.String("theme_yaml", 
-                                "./default_config.yaml", 
+                                "constants/default_theme.yaml",
                                 "Path to the yaml")
 
     build_dir := flag.String("build_dir", 
@@ -28,8 +28,13 @@ func main() {
     fmt.Println("config:", *config_yaml)
     fmt.Println("config:", *theme_yaml)
     
+    theme_info := yaml_reader(*theme_yaml)
+    config_info := yaml_reader(*config_yaml)
+
+    //Creating the build-dir
     os.MkdirAll(*build_dir, os.ModePerm)
     //index.html generator
-    index_html_generator( "test_src/index.md",*build_dir)
-    
+    index_html_generator( "test_src/index.md",*build_dir,theme_info, 
+                        config_info)
+
 }

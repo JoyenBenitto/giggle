@@ -27,13 +27,15 @@ func mdToHTML(md []byte) []byte {
 	return markdown.Render(doc, renderer)
 }
 
-func index_html_generator(index_markdown_path string, build string){
+func index_html_generator(index_markdown_path string, build string, 
+						  theme_info map[string]interface{},
+						  config_info map[string]interface{}){
 	/*
 	generates the home page
 	*/
+
 	fmt.Println("Generating index.html")
 	index_template := reader("constants/index.html")
 	rendered_index := index_template
-
 	dump(filepath.Join(build, "index.html"),string(rendered_index))
 }
