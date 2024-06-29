@@ -1,3 +1,4 @@
 build/
+giggle.egg-info
+__pycache__
 giggle
-index.html
