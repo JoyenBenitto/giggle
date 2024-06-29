@@ -1,2 +1,2 @@
 # giggle
-Giggle is a static site generator written in Go
+Giggle is a static site generator
