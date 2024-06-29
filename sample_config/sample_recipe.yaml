@@ -1,1 +1,22 @@
+chef: Joyen Benitto
 index: main.md
+
+nav_items:
+  blogs:
+    link: ./blogs.html
+  contact:
+    link: ./contact.html
+
+pages:
+  index: ./sample_config/sample_markdowns/main.md
+
+style:
+  body:
+    bg_color: "#10151D"
+    color: "white"
+  a:
+    color: "#3F989B"
+  header:
+    color: "white"
+  blockquote:
+    color: "#3F989B"
