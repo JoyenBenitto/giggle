@@ -1,0 +1,14 @@
+{#Contains the navbar tempate for the page#}
+
+{%- set tag_list=[] -%}
+{%- for tags in  recipe.nav_items%}
+    {%- if back is none %}
+        {%- set tag_list = tag_list.append("<a href="+ recipe.nav_items[tags].link + ">" + tags + "</a>") -%}
+    {%- else %}
+        {%- set tag_list = tag_list.append("<a href= ."+ recipe.nav_items[tags].link + ">" + tags + "</a>") -%}
+    {%- endif %}
+{%- endfor %}
+
+<nav class="navbar">
+    <a href="{{back}}./index.html">{{recipe.chef}}</a> | <a href="{{back}}./tags.html">tags</a> - {{tag_list|join(" - ")}}
+</nav>
