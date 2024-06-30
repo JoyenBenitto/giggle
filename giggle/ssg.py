@@ -76,6 +76,8 @@ class ssg():
             data = pathlib.Path(blog_file_path).read_text(encoding='utf-8')
             md = markdown.Markdown(extensions = ['meta'])
             md.convert(data)
+            file= blog.replace(".md",".html")
+            html_path= "../blog/"+ file
             if "tags" in md.Meta:
                 tag_list= md.Meta["tags"][0].split(",")
                 for tag in tag_list:
@@ -101,9 +103,14 @@ class ssg():
             list_ele=""
             for sites in site_list:
                 #body_html += template.tag  #f'<a href="{sites}"> ok cool </a>\n'
+                site_name=""
+                if "blog/" in sites:
+                    site_name= sites.replace("blog/","")
+                else:
+                    site_name= sites
                 list_ele +=  giggle_template.tag_site_template.format(
                     path_to_page=sites,
-                    site_name=sites.replace("../","").replace(".html",""),
+                    site_name=site_name.replace("../","").replace(".html",""),
                 ) + "\n"
 
             rendered_tag_page= template.render(
