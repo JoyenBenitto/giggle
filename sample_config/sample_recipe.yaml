@@ -2,11 +2,14 @@ chef: Joyen Benitto
 index: main.md
 
 nav_items:
+
   blogs:
     link: ./blogs.html
     path: ./sample_config/sample_markdowns/blog/
+
   outreach:
     link: ./outreach.html
+
   contact:
     link: ./contact.html
 
@@ -28,4 +31,6 @@ style:
   header:
     color: "white"
   blockquote:
+    color: "#3F989B"
+  tag:
     color: "#3F989B"

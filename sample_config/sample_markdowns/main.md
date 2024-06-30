@@ -1,3 +1,8 @@
+---
+tags: #main,#vibe
+page: main.html
+---
+
 # Joyen Benitto
 
 > There is no great genius without a mixture of madness
