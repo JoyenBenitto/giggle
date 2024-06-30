@@ -2,11 +2,7 @@
 
 {%- set tag_list=[] -%}
 {%- for tags in  recipe.nav_items%}
-    {%- if back is none %}
-        {%- set tag_list = tag_list.append("<a href="+ recipe.nav_items[tags].link + ">" + tags + "</a>") -%}
-    {%- else %}
-        {%- set tag_list = tag_list.append("<a href= ."+ recipe.nav_items[tags].link + ">" + tags + "</a>") -%}
-    {%- endif %}
+        {%- set tag_list = tag_list.append("<a href="+ back+ recipe.nav_items[tags].link + ">" + tags + "</a>") -%}
 {%- endfor %}
 
 <nav class="navbar">
