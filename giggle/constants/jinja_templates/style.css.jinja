@@ -1,7 +1,7 @@
 body {
     background-color: {{recipe.style.body.bg_color}};
     color: {{recipe.style.body.color}};
-    font-family: "Times New Roman", Times, serif;
+    font-family: "Courier Prime", monospace;
     line-height: 1.5;
     font-size: 1rem;
 }
@@ -11,12 +11,17 @@ a {
 }
 
 blockquote{
-  border-left: 5px solid {{recipe.style.blockquote.color}};
-  color: grey
+  border-left: 3px solid {{recipe.style.blockquote.border_color}};
+  color: {{recipe.style.blockquote.color}}
 }
 
 .navbar{
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid {{recipe.style.navbar.color}};
+  color: grey
+}
+
+.footer{
+  border-top: 1px solid {{recipe.style.footer.color}};
 }
 
 .container {

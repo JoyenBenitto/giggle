@@ -20,16 +20,22 @@ class blog_creater():
 
     def blog_collection_page(self):
         """Generates a page with all the blogs and its content"""
-        blog_body=""
+        blog_body_temp="""
+<ul>
+{list_items}
+</ul>
+"""
+        blog_list=""
         for blog in self.blog_list:
             data = pathlib.Path(f"{self.blogs_path}/{blog}").read_text(encoding='utf-8')
             md = markdown.Markdown(extensions = ['meta'])
             md.convert(data)
-            blog_body += giggle_template.blog_template.format(
+            blog_list += giggle_template.blog_template.format(
                 date= md.Meta["date"][0],
                 blog_title= md.Meta["title"][0],
                 tiny_desc=md.Meta["desc"][0],
                 blog_header=blog.replace(".md",""))
+        blog_body=blog_body_temp.format(list_items=blog_list)
         return blog_body 
 
     def blog_standalone_page_gen(self):

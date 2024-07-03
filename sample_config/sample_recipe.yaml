@@ -1,4 +1,5 @@
-chef: Joyen Benitto
+title: Joyen Benitto
+chef: "[Joyen Benitto]"
 index: main.md
 
 nav_items:
@@ -24,13 +25,18 @@ pages:
 
 style:
   body:
-    bg_color: "#10151D"
+    bg_color: "#0D0D0D"
     color: "white"
   a:
-    color: "#3F989B"
+    color: "#6bfe42"
   header:
-    color: "white"
+    color: "#6bfe42"
   blockquote:
-    color: "#3F989B"
+    border_color: "#6bfe42" 
+    color: "#6bfe42"
   tag:
-    color: "#3F989B"
+    color: "#6bfe42"
+  navbar:
+    color: "#6bfe42"
+  footer:
+    color: "#6bfe42"
