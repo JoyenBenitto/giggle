@@ -6,6 +6,7 @@ import logging as logger
 import markdown
 from jinja2 import Environment, FileSystemLoader
 import giggle.template as giggle_template
+from giggle import __version__
 
 here= os.path.abspath(os.path.dirname(__file__))
 
@@ -191,7 +192,8 @@ class ssg():
         template = environment.get_template("base.jinja")
         rendered_blog= template.render(recipe=self.recipe,
                                         body= blog_body,
-                                        back=" ")
+                                        back=" ",
+                                        version=__version__)
         with open(f"{self.build}/blogs.html","w") as file:
             file.write(rendered_blog)
 

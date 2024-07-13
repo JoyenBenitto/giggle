@@ -1,9 +1,15 @@
 body {
     background-color: {{recipe.style.body.bg_color}};
     color: {{recipe.style.body.color}};
-    font-family: "Courier Prime", monospace;
+    font-family: "Playfair Display", serif;
     line-height: 1.5;
     font-size: 1rem;
+    word-spacing: 2px;
+    letter-spacing: 2px;
+}
+
+main{
+  background-color: {{recipe.style.main.bg_color}}
 }
 
 a {
@@ -68,4 +74,8 @@ h4,
 h5,
 h6 {
   color: {{recipe.style.header.color}}
+}
+
+a:after {
+  content: "🡥";
 }

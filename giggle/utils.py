@@ -119,16 +119,19 @@ def clean_dir(directory):
     else:
         pass
 
-def mover(build,config):
+def mover(build, config)-> None:
     """mover function"""
-    pass
+    for to_move in config["mover"]:
+        dest= os.path.join(f"{build}/", to_move)
+        shutil.copytree(to_move, dest, dirs_exist_ok=True)
 
 def directory_setup(build, config):
     """Creates the directory structure"""
     os.makedirs(f"{build}", exist_ok=True)
     os.makedirs(f"{build}/tags", exist_ok=True)
     os.makedirs(f"{build}/blog", exist_ok=True)
-    mover(build, config)
+    config_src= load_yaml(config)
+    mover(build, config_src)
 
 def clean_dir(directory):
     '''
