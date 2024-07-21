@@ -96,7 +96,8 @@ class ssg():
 
     def tag_page_generator(self):
         """Generates tag site"""
-        tag_html="<h1>Tags</h1>\n"
+        tag_temp='<h1>Tags</h1>\n <div class="tag_holder">{tags_placeholder}</div>'
+        tag_html=""
         tag_db= self.tag_db_creater()
         environment = Environment(loader=FileSystemLoader(
             f"{here}/constants/jinja_templates"))
@@ -128,10 +129,10 @@ class ssg():
 
             with open(f"{self.build}/tags/{page_name}","w") as file:
                 file.write(rendered_tag_page)
-
+        tag_body=tag_temp.format(tags_placeholder=tag_html)
         template = environment.get_template("base.jinja")
         rendered_blog= template.render(recipe=self.recipe,
-                                        body= tag_html,
+                                        body= tag_body,
                                         back=" ")
 
         with open(f"{self.build}/tags.html","w") as file:
@@ -153,7 +154,7 @@ class ssg():
 
             with open(f"{self.build}/blog/{blog_file}", "w") as file:
                 file.write(rendered_blog)
-        return blog_body
+        return "<h1>Blogs</h1>"+ "\n" +blog_body
 
     def generate(self):
         """generates the static site"""
