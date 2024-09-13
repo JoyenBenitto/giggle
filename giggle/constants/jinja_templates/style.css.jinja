@@ -134,3 +134,35 @@ h6{
   font-weight: {{recipe.style.h6.font_weight}};
   font-style: {{recipe.style.h6.font_style}};
 }
+
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+code{
+    color: {{recipe["style"]["tag"]["color"]}};
+    margin-bottom: {{recipe["style"]["tag"]["mb"]}}rem;
+    margin-top: {{recipe["style"]["tag"]["mt"]}}rem;
+    margin-right: {{recipe["style"]["tag"]["mr"]}}rem;
+    margin-left: {{recipe["style"]["tag"]["ml"]}}rem;
+    border-radius: .375rem;
+    margin-right: .25rem;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    text-decoration: none;
+    --bg-opacity: 0;
+    /* background-color: #e2e8f0; */
+    background-color: rgba(226, 232, 240, var(--bg-opacity));
+    --text-opacity: 1;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid {{recipe["style"]["tag"]["color"]}}
+}
+
+.blog_headings{
+  text-align: center;
+}

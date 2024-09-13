@@ -13,11 +13,13 @@ here= os.path.abspath(os.path.dirname(__file__))
 class blog_creater():
     def __init__(self, **kwargs):
         self.recipe= kwargs["recipe"]
-        self.blogs_path= self.recipe["nav_items"]["blogs"]["path"]
-        self.blog_list=[]
-        for file in os.listdir(self.blogs_path):
-            if file.endswith(".md"):
-                self.blog_list.append(file)
+        self.blog_list= None
+        if "blogs" in self.recipe["nav_items"]:
+            self.blogs_path= self.recipe["nav_items"]["blogs"]["path"]
+            self.blog_list=[]
+            for file in os.listdir(self.blogs_path):
+                if file.endswith(".md"):
+                    self.blog_list.append(file)
 
     def blog_collection_page(self):
         """Generates a page with all the blogs and its content"""
@@ -57,11 +59,14 @@ class ssg():
     def __init__(self, **kwargs):
         self.recipe= kwargs["recipe"]
         self.build= kwargs["build"]
-        self.blogs_path= self.recipe["nav_items"]["blogs"]["path"]
-        self.blog_list=[]
-        for file in os.listdir(self.blogs_path):
-            if file.endswith(".md"):
-                self.blog_list.append(file)
+        self.blogs_path=None
+        self.blog_list= None
+        if "blogs" in self.recipe["nav_items"]:
+            self.blogs_path= self.recipe["nav_items"]["blogs"]["path"]
+            self.blog_list=[]
+            for file in os.listdir(self.blogs_path):
+                if file.endswith(".md"):
+                    self.blog_list.append(file)
 
     def tag_db_creater(self):
         tag_db={}
@@ -78,20 +83,21 @@ class ssg():
                         tag_db.update({tag:[html_path]})
                     else:
                         tag_db[tag].append(html_path)
-        for blog in self.blog_list:
-            blog_file_path= os.path.join(self.blogs_path, blog)
-            data = pathlib.Path(blog_file_path).read_text(encoding='utf-8')
-            md = markdown.Markdown(extensions = ['meta'])
-            md.convert(data)
-            file= blog.replace(".md",".html")
-            html_path= "../blog/"+ file
-            if "tags" in md.Meta:
-                tag_list= md.Meta["tags"][0].split(",")
-                for tag in tag_list:
-                    if tag not in tag_db:
-                        tag_db.update({tag:[html_path]})
-                    else:
-                        tag_db[tag].append(html_path)
+        if self.blog_list is not None:
+            for blog in self.blog_list:
+                blog_file_path= os.path.join(self.blogs_path, blog)
+                data = pathlib.Path(blog_file_path).read_text(encoding='utf-8')
+                md = markdown.Markdown(extensions = ['meta'])
+                md.convert(data)
+                file= blog.replace(".md",".html")
+                html_path= "../blog/"+ file
+                if "tags" in md.Meta:
+                    tag_list= md.Meta["tags"][0].split(",")
+                    for tag in tag_list:
+                        if tag not in tag_db:
+                            tag_db.update({tag:[html_path]})
+                        else:
+                            tag_db[tag].append(html_path)
         return tag_db
 
     def tag_page_generator(self):
@@ -187,16 +193,17 @@ class ssg():
 
         #blog page renderer
         logger.info("generating blogs page srcs")
-        blog_body= self.blog_renderer()
-        environment = Environment(loader=FileSystemLoader(
-            f"{here}/constants/jinja_templates"))
-        template = environment.get_template("base.jinja")
-        rendered_blog= template.render(recipe=self.recipe,
-                                        body= blog_body,
-                                        back=" ",
-                                        version=__version__)
-        with open(f"{self.build}/blogs.html","w") as file:
-            file.write(rendered_blog)
+        if self.blogs_path is not None:
+            blog_body= self.blog_renderer()
+            environment = Environment(loader=FileSystemLoader(
+                f"{here}/constants/jinja_templates"))
+            template = environment.get_template("base.jinja")
+            rendered_blog= template.render(recipe=self.recipe,
+                                            body= blog_body,
+                                            back=" ",
+                                            version=__version__)
+            with open(f"{self.build}/blogs.html","w") as file:
+                file.write(rendered_blog)
 
         #tag page renderer
         logger.info("generating tag page srcs")

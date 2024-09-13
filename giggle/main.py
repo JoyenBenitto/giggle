@@ -90,8 +90,16 @@ def cook(build_dir, recipe, verbose, no_clear):
     #directory setup
     utils.directory_setup(build_dir, recipe)
     #Creating the build directory
+    if os.path.exists(build_dir):
+        shutil.rmtree(build_dir)
+    logger.info("building...")
     os.makedirs(build_dir,exist_ok=True)
     recipe= utils.load_yaml(recipe)
+    utils.mover(f"{here}/other_const/.htaccess", f"{build_dir}/.htaccess")
+    utils.mover(f"{here}/other_const/vercel.json`", f"{build_dir}/vercel.json`")
     ssg_inst= ssg.ssg(recipe=recipe,
                       build=build_dir)
     ssg_inst.generate()
+
+if __name__ == '__main__':
+    main()
