@@ -1,44 +1,84 @@
+# Giggle Static Site Generator - Sample Configuration
+
+# Site-wide metadata and configuration
+# The title of your website
 title: Joyen Benitto
+
+# Author or creator of the site
 chef: "[Joyen Benitto]"
+
+# Default index page
 index: main.md
 
+# Navigation menu configuration
 nav_items:
-
+  # Blog section configuration
   blogs:
+    # URL link for the blogs page
     link: ./blogs.html
+    # Path to the directory containing blog markdown files
     path: ./sample_config/sample_markdowns/blog/
 
+  # Outreach page configuration
   outreach:
+    # URL link for the outreach page
     link: ./outreach.html
 
+  # Contact page configuration
   contact:
+    # URL link for the contact page
     link: ./contact.html
 
+# Meta page generation settings
 meta_pages:
+  # Enable tag page generation
   tag: true
+  # Enable blog page generation
   blogs: true
 
+# Pages to be generated
 pages:
+  # Each key represents the output HTML filename (without .html extension)
+  # Value is the path to the source markdown file
   index: ./sample_config/sample_markdowns/main.md
   outreach: ./sample_config/sample_markdowns/outreach.md
   contact: ./sample_config/sample_markdowns/contacts.md
 
+# Styling configuration
+# Customize the look and feel of your static site
 style:
+  # Body styling
   body:
+    # Background color
     bg_color: "white"
+    # Text color
     color: "white"
+  
+  # Main content area styling
   main:
     bg_color: "white"
+  
+  # Link styling
   a:
     color: "#6bfe42"
+  
+  # Header styling
   header:
     color: "#6bfe42"
+  
+  # Blockquote styling
   blockquote:
     border_color: "#6bfe42" 
     color: "#6bfe42"
+  
+  # Tag styling
   tag:
     color: "#6bfe42"
+  
+  # Navbar styling
   navbar:
     color: "#6bfe42"
+  
+  # Footer styling
   footer:
     color: "#6bfe42"

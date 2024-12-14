@@ -28,8 +28,8 @@
 import os
 import click
 import logging
-from giggle import utils
 from giggle import ssg
+from giggle import utils
 from giggle.__init__ import __version__
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -38,7 +38,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 @click.group()
 @click.version_option(version=__version__)
 def cli():
-    ''' Command-line interface for bsv wrapper Generator '''
+    ''' Command-line interface for giggle your personal site manager'''
 
 @click.version_option(version=__version__)
 
@@ -71,6 +71,13 @@ def cli():
     '--no_clear',
     is_flag=True,
     help= "Disables clone and clearing the dir"
+)
+
+
+@click.option(
+    '--production',
+    is_flag=True,
+    help= "generates production html"
 )
 
 @cli.command()

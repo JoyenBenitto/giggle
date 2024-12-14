@@ -1,138 +1,354 @@
+/* Minimalist High-Fashion Retail Inspired Design */
+:root {
+    /* Refined Color Palette */
+    --color-primary-dark: #000000;
+    --color-primary-light: #ffffff;
+    --color-accent-gray: #808080;
+    --color-accent-light-gray: #f5f5f5;
+    --color-accent-dark-gray: #333333;
+    --color-accent-primary: #333333;
+    
+    /* Typography */
+    --font-primary: 'Neue Haas Grotesk', 'Helvetica Neue', Arial, sans-serif;
+    --font-secondary: 'Didot', Georgia, serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
 body {
-    background-color: {{recipe.style.body.bg_color}};
-    color: {{recipe.style.body.color}};
-    font-family: {{recipe.style.body.font_family}};
-    font-optical-sizing: auto;
-    font-style: normal;
-}
-
-table {
-  width: 100%;
-  border: {{recipe.style.table.border}}
-}
-
-main{
-  background-color: {{recipe.style.main.bg_color}}
-}
-
-ul{
-  padding: 0rem;
-}
-
-li{ 
-  list-style: none; 
-  margin-bottom: 0.25rem;
-} 
-   
-li::before{ 
-  content: "{{recipe.style.li.symbol}}";
-  color: {{recipe.style.li.symbol_color}};
-  padding-right: 1rem;
-}
-
-
-a {
-    color: {{recipe.style.a.color}};
-}
-
-blockquote{
-  border-left: 3px solid {{recipe.style.blockquote.border_color}};
-  color: {{recipe.style.blockquote.color}};
-}
-
-.navbar{
-  border-bottom: 1px solid {{recipe.style.navbar.color}};
-  color: grey;
-  font-family: {{recipe.style.navbar.font_family}}
-}
-
-.footer{
-  border-top: 1px solid {{recipe.style.footer.color}};
+    font-family: var(--font-primary);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    line-height: 1.6;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
 }
 
 .container {
-  padding: 1em;
-  margin: 1em;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
 }
 
+/* Typography Styling */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-secondary);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--color-primary-dark);
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background-color: var(--color-primary-dark);
+}
+
+p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--color-accent-dark-gray);
+    margin-bottom: 1.5rem;
+}
+
+/* List Styling */
+ul, ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    color: var(--color-accent-dark-gray);
+}
+
+ul {
+    list-style-type: none;
+    position: relative;
+}
+
+ul li {
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-primary);
+    font-weight: bold;
+}
+
+ol {
+    list-style-type: none;
+    counter-reset: item;
+}
+
+ol li {
+    counter-increment: item;
+    padding-left: 2rem;
+    position: relative;
+}
+
+ol li::before {
+    content: counter(item) '.';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-primary);
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* Nested Lists */
+ul ul, ol ol {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* List Item Spacing */
+li {
+    margin-bottom: 0.5rem;
+}
+
+/* Hover Effects for List Items */
+li:hover {
+    background-color: var(--color-accent-light-gray);
+    transition: background-color 0.3s ease;
+}
+
+/* Links and Interactions */
+a {
+    color: var(--color-primary-dark);
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--color-primary-dark);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+a:hover::after {
+    transform: scaleX(1);
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: var(--color-primary-light);
+    border-bottom: 1px solid var(--color-accent-light-gray);
+}
+
+nav ul {
+    display: flex;
+    list-style: none !important;
+    list-style-type: none !important;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+nav ul li {
+    list-style: none !important;
+    list-style-type: none !important;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li::marker {
+    display: none;
+}
+
+nav ul li::before {
+    display: none;
+    content: none;
+}
+
+nav ul li a {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-accent-gray);
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+    padding: 0.5rem 0;
+}
+
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--color-primary-dark);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: var(--color-primary-dark);
+}
+
+nav ul li a:hover::after {
+    transform: scaleX(1);
+}
+
+nav ul li a.active {
+    color: var(--color-primary-dark);
+}
+
+nav ul li a.active::after {
+    transform: scaleX(1);
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        padding: 1rem;
+        align-items: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+/* Image Styling */
+img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+img:hover {
+    opacity: 0.8;
+}
+
+/* Grid Layout */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+/* Tags and Metadata */
 .tag {
     display: inline-block;
-    color: {{recipe["style"]["tag"]["color"]}};
-    margin-bottom: {{recipe["style"]["tag"]["mb"]}}rem;
-    margin-top: {{recipe["style"]["tag"]["mt"]}}rem;
-    margin-right: {{recipe["style"]["tag"]["mr"]}}rem;
-    margin-left: {{recipe["style"]["tag"]["ml"]}}rem;
-    padding-top: {{recipe["style"]["tag"]["pt"]}}rem;
-    padding-bottom: {{recipe["style"]["tag"]["pb"]}}rem;
-    padding-left: {{recipe["style"]["tag"]["pl"]}}rem;
-    padding-right: {{recipe["style"]["tag"]["pr"]}}rem;
-    border-radius: .375rem;
-    margin-right: .25rem;
-    font-size: .875rem;
-    line-height: 1.25rem;
-    text-decoration: none;
-    --bg-opacity: 0;
-    /* background-color: #e2e8f0; */
-    background-color: rgba(226, 232, 240, var(--bg-opacity));
-    --text-opacity: 1;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    border: 1px solid {{recipe["style"]["tag"]["color"]}}
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-accent-light-gray);
+    color: var(--color-primary-dark);
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
-code {
-    background: #efefef;
-    background: var(--background);
-    color: #000;
-    color: var(--code);
-    padding: 2.5px 5px;
-    border-radius: 6px;
-    font-size: 1em;
-    font-family: monospace;
+/* Footer Styling */
+footer {
+    background-color: var(--color-primary-light);
+    padding: 2rem 0;
+    border-top: 1px solid var(--color-accent-light-gray);
 }
 
-h1{
-  color: {{recipe.style.h1.color}};
-  font-family: {{recipe.style.h1.font_family}}
-  font-weight: {{recipe.style.h1.font_weight}};
-  font-style: {{recipe.style.h1.font_style}};
+.footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-h2{
-  color: {{recipe.style.h2.color}};
-  font-family: {{recipe.style.h2.font_family}}
-  font-weight: {{recipe.style.h2.font_weight}};
-  font-style: {{recipe.style.h2.font_style}};
+.social-links {
+    display: flex;
+    gap: 1.5rem;
 }
 
-h3{
-  color: {{recipe.style.h3.color}};
-  font-family: {{recipe.style.h3.font_family}}
-  font-weight: {{recipe.style.h3.font_weight}};
-  font-style: {{recipe.style.h3.font_style}};
+.social-links a {
+    color: var(--color-accent-gray);
+    font-size: 0.875rem;
+    transition: color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
-h4{
-  color: {{recipe.style.h4.color}};
-  font-family: {{recipe.style.h4.font_family}}
-  font-weight: {{recipe.style.h4.font_weight}};
-  font-style: {{recipe.style.h4.font_style}};
+.social-links a:hover {
+    color: var(--color-primary-dark);
 }
 
-h5{
-  color: {{recipe.style.h5.color}};
-  font-family: {{recipe.style.h5.font_family}}
-  font-weight: {{recipe.style.h5.font_weight}};
-  font-style: {{recipe.style.h5.font_style}};
+.copyright {
+    font-size: 0.75rem;
+    color: var(--color-accent-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
-h6{  
-  color: {{recipe.style.h6.color}};
-  font-family: {{recipe.style.h6.font_family}}
-  font-weight: {{recipe.style.h6.font_weight}};
-  font-style: {{recipe.style.h6.font_style}};
+/* Responsive Footer */
+@media (max-width: 768px) {
+    .footer-bottom {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .social-links {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background-color: var(--color-primary-light);
+    }
 }
 
 img {

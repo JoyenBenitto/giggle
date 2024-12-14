@@ -5,25 +5,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/tokyo-night-dark.min.css">
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
-    <link href="https://fonts.googleapis.com">
     <link href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Gentium+Plus&family=Inter&family=JetBrains+Mono:wght@300&display=swap"
-        rel="stylesheet">
-    <link rel="preconnect" href="https://rsms.me/">
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+
+{{recipe.fonts}}
+    <link rel= "stylesheet" href="https://latex.vercel.app/style.css">
     <link rel= "stylesheet" href="../style.css">
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title> {{recipe.chef}} </title>
+    <title> {{recipe.title}} </title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>{{recipe["favicon"]}}</text></svg>"></link>
 </head>
-
 <body>
     <main class="container">
         {% include "navbar.jinja" %}
