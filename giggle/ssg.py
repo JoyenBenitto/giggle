@@ -5,6 +5,7 @@ import pathlib
 import logging
 import sys
 from typing import Dict, List, Optional, Any, Union, Tuple
+from datetime import datetime
 
 import yaml
 import markdown
@@ -16,7 +17,7 @@ import giggle.template as giggle_template
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s | %(levelname)-8s | %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
@@ -109,15 +110,21 @@ class ConfigurationLoader:
 class BlogProcessor:
     """Advanced blog processing and rendering."""
     
-    def __init__(self, blogs_path: str):
+    def __init__(self, blogs_path: str, env: Environment):
         """
         Initialize blog processor.
         
         Args:
             blogs_path (str): Path to blog markdown files
+            env (Environment): Jinja2 environment for template rendering
         """
+        logger.info(f"Initializing BlogProcessor with path: {blogs_path}")
         self.blogs_path = blogs_path
+        self.env = env
         self.blog_files = self._get_blog_files()
+        logger.info(f"Found blog files: {self.blog_files}")
+        self.blogs_metadata = self._process_all_blogs()
+        logger.info(f"Processed {len(self.blogs_metadata)} blog posts")
     
     def _get_blog_files(self) -> List[str]:
         """
@@ -127,15 +134,49 @@ class BlogProcessor:
             List of blog markdown filenames
         """
         try:
-            return [
+            if not os.path.exists(self.blogs_path):
+                logger.error(f"Blog directory does not exist: {self.blogs_path}")
+                return []
+            
+            files = [
                 file for file in os.listdir(self.blogs_path) 
                 if file.endswith(".md")
             ]
+            logger.debug(f"Found markdown files in {self.blogs_path}: {files}")
+            return files
         except OSError as e:
             logger.error(f"Error reading blog directory: {e}")
             return []
     
-    def _extract_blog_metadata(self, blog_file: str) -> Dict[str, str]:
+    def _parse_date(self, date_str: str) -> Optional[datetime]:
+        """
+        Parse date string into datetime object.
+        
+        Args:
+            date_str (str): Date string from blog metadata
+            
+        Returns:
+            datetime object
+        """
+        if not date_str:
+            return None
+            
+        try:
+            # Try common date formats
+            for fmt in ["%Y-%m-%d", "%Y/%m/%d", "%B %d, %Y", "%d %B %Y"]:
+                try:
+                    return datetime.strptime(date_str, fmt)
+                except ValueError:
+                    continue
+            
+            # If no format matches, return None
+            logger.warning(f"Could not parse date: {date_str}")
+            return None
+        except Exception as e:
+            logger.error(f"Error parsing date {date_str}: {e}")
+            return None
+
+    def _extract_blog_metadata(self, blog_file: str) -> Optional[Dict[str, Any]]:
         """
         Extract metadata from a blog markdown file.
         
@@ -146,191 +187,170 @@ class BlogProcessor:
             Dictionary of blog metadata
         """
         try:
-            with open(os.path.join(self.blogs_path, blog_file), 'r', encoding='utf-8') as f:
+            full_path = os.path.join(self.blogs_path, blog_file)
+            logger.debug(f"Extracting metadata from {full_path}")
+            
+            with open(full_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-                md = markdown.Markdown(extensions=['meta'])
-                md.convert(content)
                 
-                metadata = {
-                    'title': md.Meta.get('title', [blog_file])[0],
-                    'date': md.Meta.get('date', ['Unknown'])[0],
-                    'summary': md.Meta.get('summary', ['No summary available'])[0],
-                    'filename': blog_file.replace('.md', '.html')
-                }
-                return metadata
+            md = markdown.Markdown(extensions=['meta', 'fenced_code', 'codehilite'])
+            body = md.convert(content)
+            
+            # Extract metadata
+            title = md.Meta.get('title', [os.path.splitext(blog_file)[0]])[0]
+            description = md.Meta.get('description', [''])[0]
+            date_str = md.Meta.get('date', [''])[0]
+            date_obj = self._parse_date(date_str)
+            
+            logger.debug(f"Raw metadata for {blog_file}:")
+            logger.debug(f"  Title: {title}")
+            logger.debug(f"  Description: {description}")
+            logger.debug(f"  Date: {date_str}")
+            logger.debug(f"  Parsed date: {date_obj}")
+            
+            tags = []
+            if 'tags' in md.Meta:
+                # Clean up tags by removing brackets and extra whitespace
+                raw_tags = md.Meta['tags'][0].strip('[]').split(',')
+                tags = [tag.strip() for tag in raw_tags]
+                logger.debug(f"  Tags: {tags}")
+            
+            # Generate URL - ensure it's in the blogs/ subdirectory
+            url = f"blogs/{os.path.splitext(blog_file)[0]}.html"
+            logger.debug(f"  URL: {url}")
+            
+            metadata = {
+                'title': title,
+                'description': description,
+                'date': date_str,
+                'datetime': date_obj or datetime.min,  # Use min date if parsing fails
+                'tags': tags,
+                'url': url,
+                'body': body
+            }
+            logger.debug(f"Extracted metadata: {metadata}")
+            return metadata
         except Exception as e:
-            logger.warning(f"Could not process blog {blog_file}: {e}")
-            return {}
+            logger.error(f"Error extracting metadata from {blog_file}: {e}")
+            return None
     
-    def generate_blog_collection_page(self) -> str:
+    def _process_all_blogs(self) -> List[Dict[str, Any]]:
+        """
+        Process all blog files and sort by date.
+        
+        Returns:
+            List of blog metadata dictionaries, sorted by date
+        """
+        blogs = []
+        for blog_file in self.blog_files:
+            metadata = self._extract_blog_metadata(blog_file)
+            if metadata:
+                blogs.append(metadata)
+        
+        # Sort blogs by date, newest first
+        return sorted(blogs, key=lambda x: x['datetime'], reverse=True)
+    
+    def generate_blog_collection_page(self, recipe: Dict[str, Any]) -> str:
         """
         Generate a blog collection page with blog summaries.
+        
+        Args:
+            recipe (Dict): Site configuration
         
         Returns:
             HTML string representing blog collection
         """
-        blog_list_html = ""
-        for blog in self.blog_files:
-            blog_metadata = self._extract_blog_metadata(blog)
-            if blog_metadata:
-                blog_list_html += giggle_template.blog_template.format(**blog_metadata)
+        logger.info("Generating blog collection page")
+        logger.debug(f"Number of blog posts: {len(self.blogs_metadata)}")
+        for post in self.blogs_metadata:
+            logger.debug(f"Blog post: {post['title']}, URL: {post['url']}, Date: {post['date']}")
         
-        return f"""
-        <div class="blog-collection">
-            <h1>Blog Posts</h1>
-            <ul>
-                {blog_list_html}
-            </ul>
-        </div>
-        """
+        # Render the blog index page directly - it already extends base.jinja
+        rendered = self.env.get_template('blog_index.jinja').render(
+            posts=self.blogs_metadata,
+            recipe=recipe
+        )
+        logger.debug("Generated blog index page")
+        
+        return rendered
     
-    def generate_standalone_blog_pages(self) -> List[Tuple[str, str]]:
+    def generate_standalone_blog_pages(self, recipe: Dict[str, Any]) -> List[Tuple[str, str]]:
         """
         Generate individual blog pages.
+        
+        Args:
+            recipe (Dict): Site configuration
         
         Returns:
             List of tuples with (filename, rendered_content)
         """
         blog_pages = []
-        for blog_file in self.blog_files:
+        template = self.env.get_template('blog_post.jinja')
+        
+        for blog in self.blogs_metadata:
             try:
-                with open(os.path.join(self.blogs_path, blog_file), 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    md = markdown.Markdown(extensions=['meta', 'fenced_code', 'codehilite'])
-                    html_content = md.convert(content)
-                    
-                    blog_pages.append((
-                        blog_file.replace('.md', '.html'),
-                        f"""
-                        <article class="blog-post">
-                            <h1>{md.Meta.get('title', [blog_file])[0]}</h1>
-                            <div class="blog-meta">
-                                <span class="blog-date">{md.Meta.get('date', ['Unknown'])[0]}</span>
-                            </div>
-                            {html_content}
-                        </article>
-                        """
-                    ))
+                logger.debug(f"Generating standalone page for blog: {blog['title']}")
+                rendered_content = template.render(
+                    title=blog['title'],
+                    date=blog['date'],
+                    content=blog['body'],
+                    tags=blog['tags'],
+                    author=blog.get('author', ''),
+                    description=blog['description'],
+                    recipe=recipe
+                )
+                blog_pages.append((blog['url'], rendered_content))
+                logger.debug(f"Generated page for {blog['url']}")
             except Exception as e:
-                logger.error(f"Error processing blog page {blog_file}: {e}")
+                logger.error(f"Error processing blog page {blog['url']}: {e}")
         
         return blog_pages
 
 class TagProcessor:
     """Advanced tag processing and generation."""
     
-    def __init__(self, recipe: Dict[str, Any]):
+    def __init__(self, recipe: Dict[str, Any], env: Environment):
         """
         Initialize tag processor.
         
         Args:
             recipe (Dict): Site configuration
+            env (Environment): Jinja2 environment
         """
+        logger.info("Initializing TagProcessor")
         self.recipe = recipe
-        self.tag_db = self._create_tag_database()
+        self.env = env
+        self.tag_db = {}
+        logger.debug(f"Initialized TagProcessor with recipe: {recipe}")
     
-    def _create_tag_database(self) -> Dict[str, Dict[str, Any]]:
+    def process_tags(self, file_path: str, page_info: Dict[str, Any]) -> None:
         """
-        Create a comprehensive tag database.
+        Process tags from a file and update tag database.
         
-        Returns:
-            Dictionary mapping normalized tags to their metadata
+        Args:
+            file_path (str): Path to the file
+            page_info (Dict): Page metadata including tags
         """
-        tag_db = {}
-        
-        def process_tags(file_path: str, html_path: str):
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    md = markdown.Markdown(extensions=['meta'])
-                    md.convert(content)
-                    
-                    if 'tags' in md.Meta:
-                        tag_list = [tag.strip() for tag in md.Meta['tags'][0].split(',')]
-                        for tag in tag_list:
-                            normalized_tag = tag.lower().replace(" ", "-")
-                            if normalized_tag not in tag_db:
-                                tag_db[normalized_tag] = {
-                                    'display_name': tag,
-                                    'pages': [html_path]
-                                }
-                            else:
-                                tag_db[normalized_tag]['pages'].append(html_path)
-            except Exception as e:
-                logger.error(f"Error processing tags in {file_path}: {e}")
-        
-        # Process main pages
-        for page, file_path in self.recipe.get("pages", {}).items():
-            html_path = f"../{page}.html"
-            process_tags(file_path, html_path)
-        
-        return tag_db
-    
-    def _process_tags(self):
-        """Process tags from markdown files and generate tag pages."""
-        tag_dict = {}
-        
-        # Process all markdown files
-        for page, markdown_path in self.recipe.get("pages", {}).items():
-            try:
-                logger.info(f"Processing tags for {markdown_path}")
-                
-                # Skip if it's a directory
-                if os.path.isdir(markdown_path):
-                    logger.info(f"Skipping directory {markdown_path} during tag processing")
-                    continue
-                
-                with open(markdown_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    md = markdown.Markdown(extensions=['meta'])
-                    md.convert(content)
-                    
-                    # Extract tags from metadata
-                    if 'tags' in md.Meta:
-                        tags = [tag.strip() for tag in md.Meta['tags'][0].strip('[]').split(',')]
-                        logger.info(f"Found tags in {page}: {tags}")
-                        
-                        # Add page to each tag's list
-                        for tag in tags:
-                            tag = tag.strip()
-                            if tag not in tag_dict:
-                                tag_dict[tag] = []
-                            tag_dict[tag].append({
-                                'page': page,
-                                'title': md.Meta.get('title', [page])[0],
-                                'description': md.Meta.get('description', [''])[0]
-                            })
-                    else:
-                        logger.info(f"No tags found in {page}")
-            except Exception as e:
-                logger.error(f"Error processing tags in {markdown_path}: {e}")
-                continue
-        
-        # Generate tag pages if enabled
-        if self.recipe.get("features", {}).get("tag_pages", False):
-            logger.info("Generating tag pages...")
-            env = Environment(
-                loader=FileSystemLoader(
-                    os.path.join(os.path.dirname(__file__), "constants/jinja_templates")
-                )
-            )
-            tag_template = env.get_template("tag_page.jinja")
+        if not os.path.isfile(file_path):
+            logger.debug(f"Skipping directory {file_path} during tag processing")
+            return
             
-            for tag, pages in tag_dict.items():
-                try:
-                    rendered_page = tag_template.render(
-                        recipe=self.recipe,
-                        tag=tag,
-                        pages=pages
-                    )
-                    
-                    # Write tag page
-                    tag_file = os.path.join(self.build_dir, f"tag_{tag}.html")
-                    with open(tag_file, "w", encoding='utf-8') as f:
-                        f.write(rendered_page)
-                    logger.info(f"Generated tag page: tag_{tag}.html")
-                except Exception as e:
-                    logger.error(f"Error generating tag page for {tag}: {e}")
+        try:
+            tags = page_info.get('tags', [])
+            if not tags:
+                logger.debug(f"No tags found in {os.path.basename(file_path)}")
+                return
+                
+            logger.info(f"Processing tags for {os.path.basename(file_path)}: {tags}")
+            
+            for tag in tags:
+                if tag not in self.tag_db:
+                    self.tag_db[tag] = []
+                self.tag_db[tag].append(page_info)
+                logger.debug(f"Added page to tag '{tag}': {page_info['title']}")
+                
+        except Exception as e:
+            logger.error(f"Error processing tags in {file_path}: {e}")
     
     def generate_tag_pages(self, build_dir: str) -> None:
         """
@@ -339,81 +359,64 @@ class TagProcessor:
         Args:
             build_dir (str): Build directory path
         """
-        self.build_dir = build_dir
-        self._process_tags()
+        logger.info(f"Generating tag pages. Found tags: {list(self.tag_db.keys())}")
         
-        tag_dir = os.path.join(build_dir, 'tags')
-        os.makedirs(tag_dir, exist_ok=True)
-        
-        # Check if tag page templates exist
         try:
-            env = Environment(
-                loader=FileSystemLoader(
-                    os.path.join(os.path.dirname(__file__), "constants/jinja_templates")
-                ),
-                autoescape=select_autoescape()
-            )
-            tag_index_template = env.get_template("tag_index.jinja")
-        except Exception as e:
-            logger.warning(f"Tag page templates not found. Skipping tag page generation: {e}")
-            return
-        
-        # Prepare default typography and styles
-        default_typography = {
-            'font_family': {
-                'body': '"Inter", sans-serif',
-                'headers': '"Roboto", sans-serif'
-            },
-            'sizes': {
-                'body': '16px',
-                'headers': {
-                    'h1': '1.8rem',
-                    'h2': '1.5rem',
-                    'h3': '1.3rem'
-                }
-            }
-        }
-        
-        default_styles = {
-            'dark_mode': {
-                'background_color': '#121212',
-                'text_color': '#E0E0E0',
-                'primary_color': '#2196F3',
-                'secondary_color': '#A0A0A0'
-            }
-        }
-        
-        # Ensure styles is a dictionary with dark_mode
-        styles = self.recipe.get('styles', {})
-        if 'dark_mode' not in styles:
-            styles['dark_mode'] = default_styles['dark_mode']
-        
-        # Debug logging
-        logger.info(f"Typography: {default_typography}")
-        logger.info(f"Styles: {styles}")
-        
-        # Generate tag index page
-        try:
-            rendered_tag_index = tag_index_template.render(
-                tag_db=self.tag_db,
-                typography=self.recipe.get('typography', default_typography),
-                styles=styles
-            )
+            # Create tags directory
+            tags_dir = os.path.join(build_dir, 'tags')
+            os.makedirs(tags_dir, exist_ok=True)
             
-            with open(os.path.join(build_dir, "tags.html"), "w", encoding='utf-8') as f:
-                f.write(rendered_tag_index)
+            # Get templates
+            tag_template = self.env.get_template('tag_page.jinja')
+            tags_index_template = self.env.get_template('tags_index.jinja')
+            
+            # Generate individual tag pages
+            for tag, pages in self.tag_db.items():
+                try:
+                    logger.debug(f"Generating page for tag '{tag}' with {len(pages)} pages")
+                    rendered_page = tag_template.render(
+                        tag=tag,
+                        pages=pages,
+                        recipe=self.recipe
+                    )
+                    
+                    output_path = os.path.join(tags_dir, f"{tag}.html")
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        f.write(rendered_page)
+                    logger.info(f"Generated tag page: {tag}.html")
+                        
+                except Exception as e:
+                    logger.error(f"Error generating tag page for {tag}: {e}")
+            
+            # Generate tags index
+            try:
+                logger.debug(f"Generating tags index with tags: {list(self.tag_db.keys())}")
+                rendered_index = tags_index_template.render(
+                    tags=sorted(self.tag_db.keys()),
+                    tag_counts={tag: len(pages) for tag, pages in self.tag_db.items()},
+                    recipe=self.recipe
+                )
+                
+                index_path = os.path.join(build_dir, 'tags.html')
+                with open(index_path, 'w', encoding='utf-8') as f:
+                    f.write(rendered_index)
+                logger.info("Generated tags index page")
+                    
+            except Exception as e:
+                logger.error(f"Error generating tags index: {e}")
+                
         except Exception as e:
-            logger.error(f"Error generating tag index page: {e}")
+            logger.error(f"Error during tag page generation: {e}")
 
 class StaticSiteGenerator:
     """Modern static site generator with enhanced configuration handling."""
     
     def __init__(
-        self, 
-        site_config: Union[str, List[str]], 
-        style_config: Optional[Union[str, List[str]]] = None, 
-        build_dir: Optional[str] = None
-    ):
+            self, 
+            site_config: Union[str, List[str]], 
+            style_config: Optional[Union[str, List[str]]] = None, 
+            build_dir: Optional[str] = None
+        ):
         """
         Initialize static site generator with flexible configuration.
         
@@ -425,6 +428,9 @@ class StaticSiteGenerator:
         # Resolve and load configuration files
         site_config_paths = ConfigurationLoader.resolve_config_paths(site_config)
         style_config_paths = ConfigurationLoader.resolve_config_paths(style_config or [])
+        
+        # Store config directory for relative path resolution
+        self.config_dir = os.path.dirname(site_config_paths[0])
         
         # Merge configurations
         self.site_config = ConfigurationLoader.load_config(site_config_paths)
@@ -447,7 +453,7 @@ class StaticSiteGenerator:
         
         # Setup logging
         logging.basicConfig(
-            level=logging.INFO, 
+            level=logging.DEBUG,
             format='%(asctime)s | %(levelname)-8s | %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
@@ -463,6 +469,20 @@ class StaticSiteGenerator:
             autoescape=select_autoescape()
         )
     
+    def _resolve_path(self, path: str) -> str:
+        """
+        Resolve a path relative to the config file directory.
+        
+        Args:
+            path (str): Path to resolve
+            
+        Returns:
+            Absolute path
+        """
+        if os.path.isabs(path):
+            return path
+        return os.path.join(self.config_dir, path)
+    
     def _normalize_recipe_structure(self):
         """
         Normalize the recipe dictionary to ensure compatibility with existing templates.
@@ -470,6 +490,10 @@ class StaticSiteGenerator:
         # Ensure 'style' key exists with all expected subkeys
         if 'style' not in self.recipe:
             self.recipe['style'] = {}
+        
+        # Move social links to top level if they are under 'site'
+        if 'site' in self.recipe and 'social_links' in self.recipe['site']:
+            self.recipe['social_links'] = self.recipe['site']['social_links']
         
         # Map components to style structure
         style_mapping = {
@@ -515,9 +539,8 @@ class StaticSiteGenerator:
                                 ref_path = value.strip('{}').split('.')
                                 value = self._get_nested_value(self.recipe, ref_path)
                             except Exception:
-                                continue
-                        
-                        self.recipe['style'][key][style_prop] = value
+                                pass
+                    self.recipe['style'][key][style_prop] = value
         
         # Add some default values if missing
         default_styles = {
@@ -568,158 +591,136 @@ class StaticSiteGenerator:
         Returns:
             Optional path to blogs directory
         """
-        nav_items = self.site_config.get('navigation', [])
-        blogs_nav = next(
-            (item for item in nav_items if item.get('name', '').lower() == 'blogs'), 
-            None
-        )
-        return blogs_nav.get('path') if blogs_nav else None
+        try:
+            blogs_config = self.recipe.get("pages", {}).get("blogs", {})
+            if isinstance(blogs_config, dict):
+                blog_path = blogs_config.get("path")
+                if isinstance(blog_path, list):
+                    blog_path = blog_path[0]  # Take the first path if multiple are provided
+                if blog_path:
+                    return self._resolve_path(blog_path)
+            return None
+        except Exception as e:
+            logger.info("No blog path configured")
+            return None
     
     def generate(self):
         """Generate the static site."""
-        log_section("Starting Static Site Generation")
-        
         try:
-            # Generate pages from markdown
-            log_section("Generating Pages")
-            self._generate_pages()
+            logger.info("Starting site generation")
+            logger.debug(f"Recipe structure: {self.recipe}")
             
-            # Generate CSS from template
-            log_section("Generating Styles")
+            # Create build directory if it doesn't exist
+            os.makedirs(self.build_dir, exist_ok=True)
+            logger.info(f"Created build directory: {self.build_dir}")
+            
+            # Initialize processors
+            if self.blogs_path:
+                logger.info(f"Blog path configured: {self.blogs_path}")
+                blog_processor = BlogProcessor(self.blogs_path, self.env)
+            else:
+                logger.info("No blog path configured")
+                blog_processor = None
+                
+            tag_processor = TagProcessor(self.recipe, self.env)
+            
+            # Generate pages
+            logger.info("Generating regular pages")
+            self._generate_pages(tag_processor)
+            
+            # Generate blog pages if configured
+            if blog_processor:
+                logger.info("Generating blog pages")
+                self._generate_blog_pages(blog_processor)
+                
+                # Process blog tags
+                logger.info("Processing blog tags")
+                for blog in blog_processor.blogs_metadata:
+                    if blog.get('tags'):
+                        logger.debug(f"Processing tags for blog: {blog['title']}")
+                        tag_processor.process_tags(
+                            os.path.join(self.blogs_path, blog['url'].replace('blogs/', '').replace('.html', '.md')),
+                            {
+                                'title': blog['title'],
+                                'description': blog.get('description', ''),
+                                'tags': blog.get('tags', []),
+                                'date': blog['date'],
+                                'url': blog['url']
+                            }
+                        )
+            
+            # Process tags if enabled
+            if self.recipe.get('features', {}).get('tag_pages', False):
+                logger.info("Tag pages enabled, generating tag pages")
+                tag_processor.generate_tag_pages(self.build_dir)
+            else:
+                logger.info("Tag pages disabled, skipping tag generation")
+            
+            # Generate CSS
+            logger.info("Generating CSS")
             self._generate_css()
             
-            # Copy static assets
-            log_section("Copying Assets")
+            # Copy assets
+            logger.info("Copying assets")
             self._copy_assets()
             
-            # Process tags
-            if self.recipe.get("features", {}).get("tag_pages", False):
-                log_section("Processing Tags")
-                self._process_tags()
-            
-            log_section("Build Complete")
-            logger.info("Static site generation completed successfully!")
-            logger.info(f"Output directory: {self.build_dir}")
+            logger.info(f"Site generation complete in {self.build_dir}")
             
         except Exception as e:
             logger.error(f"Error during site generation: {e}")
             raise
-    
-    def _process_blog_directory(self, blog_dir: str) -> None:
-        """Process a directory of blog posts."""
-        logger.info(f"Processing blog directory: {blog_dir}")
+            
+    def _generate_blog_pages(self, blog_processor: BlogProcessor):
+        """Generate blog pages."""
+        logger.info("Generating blog pages")
+        logger.debug(f"Recipe features: {self.recipe.get('features', {})}")
+        logger.debug(f"Blog pages enabled: {self.recipe.get('features', {}).get('blog_pages', False)}")
         
-        try:
-            # Get all markdown files in the blog directory
-            blog_files = [f for f in os.listdir(blog_dir) if f.endswith('.md')]
-            logger.info(f"Found blog files: {blog_files}")
-            
-            # Process each blog post
-            blog_posts = []
-            for blog_file in blog_files:
-                blog_path = os.path.join(blog_dir, blog_file)
-                try:
-                    # Read and parse blog post
-                    with open(blog_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                    
-                    # Parse markdown with metadata
-                    md = markdown.Markdown(extensions=['meta', 'fenced_code'])
-                    html_content = md.convert(content)
-                    meta = md.Meta
-                    
-                    # Extract metadata
-                    title = meta.get('title', [blog_file])[0]
-                    description = meta.get('description', [''])[0]
-                    date = meta.get('date', [''])[0]
-                    tags = meta.get('tags', [])[0].split(',') if 'tags' in meta else []
-                    tags = [tag.strip() for tag in tags]
-                    
-                    # Generate output path
-                    output_filename = os.path.splitext(blog_file)[0] + '.html'
-                    output_path = os.path.join(self.build_dir, 'blog', output_filename)
-                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-                    
-                    # Store in tag database
-                    relative_url = os.path.join('blog', output_filename)
-                    self.tag_db[output_path] = {
-                        'title': title,
-                        'description': description,
-                        'tags': tags,
-                        'date': date,
-                        'url': relative_url
-                    }
-                    
-                    # Render blog post
-                    template = self.env.get_template('blog_post.jinja')
-                    rendered = template.render(
-                        content=html_content,
-                        title=title,
-                        description=description,
-                        date=date,
-                        tags=tags,
-                        recipe=self.recipe,
-                        site=self.recipe.get('site', {}),
-                        style=self.style_config
-                    )
-                    
-                    # Write blog post
-                    with open(output_path, 'w', encoding='utf-8') as f:
-                        f.write(rendered)
-                    
-                    # Add to blog posts list
-                    blog_posts.append({
-                        'title': title,
-                        'description': description,
-                        'date': date,
-                        'tags': tags,
-                        'url': relative_url
-                    })
-                    
-                    logger.info(f"Processed blog post: {title}")
-                    
-                except Exception as e:
-                    logger.error(f"Error processing blog post {blog_file}: {str(e)}")
-                    continue
-            
-            # Sort blog posts by date (newest first)
-            blog_posts.sort(key=lambda x: x.get('date', ''), reverse=True)
-            
-            # Generate blog index
-            try:
-                template = self.env.get_template('blog_index.jinja')
-                index_path = os.path.join(self.build_dir, 'blogs.html')
-                
-                rendered = template.render(
-                    posts=blog_posts,
-                    recipe=self.recipe,
-                    site=self.recipe.get('site', {}),
-                    style=self.style_config
-                )
-                
-                with open(index_path, 'w', encoding='utf-8') as f:
-                    f.write(rendered)
-                logger.info("Generated blog index page")
-                
-            except Exception as e:
-                logger.error(f"Error generating blog index: {str(e)}")
-            
-        except Exception as e:
-            logger.error(f"Error processing blog directory: {str(e)}")
-            raise
-    
-    def _generate_pages(self):
+        # Generate individual blog pages
+        logger.info("Generating blog pages")
+        blog_pages = blog_processor.generate_standalone_blog_pages(self.recipe)
+        
+        # Create blogs directory if it doesn't exist
+        blogs_dir = os.path.join(self.build_dir, 'blogs')
+        os.makedirs(blogs_dir, exist_ok=True)
+        
+        # Save individual blog pages
+        for filename, content in blog_pages:
+            output_path = os.path.join(self.build_dir, filename)
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        
+        # Generate and save blog collection page if enabled
+        if self.recipe.get('features', {}).get('blog_pages', False):
+            logger.info("Blog pages feature enabled, generating blog index page")
+            logger.info("Generating blog collection page")
+            blogs_index = blog_processor.generate_blog_collection_page(self.recipe)
+            with open(os.path.join(self.build_dir, 'blogs.html'), 'w', encoding='utf-8') as f:
+                f.write(blogs_index)
+            logger.info("Generated blog index page")
+        else:
+            logger.info("Blog pages feature not enabled, skipping blog index generation")
+
+    def _generate_pages(self, tag_processor: TagProcessor):
         """Generate HTML pages from markdown sources."""
-        for page, markdown_path in self.recipe.get("pages", {}).items():
+        pages = self.recipe.get("pages", {})
+        
+        # Process root pages
+        root_pages = pages.get("root", {})
+        for page, markdown_path in root_pages.items():
             try:
-                # Handle blog directory separately
-                if os.path.isdir(markdown_path):
-                    if page == 'blogs':
-                        self._process_blog_directory(markdown_path)
-                    logger.info(f"Skipping directory {markdown_path}, will be processed separately")
+                logger.info(f"Processing page: {page} from {markdown_path}")
+                
+                # Skip commented out pages
+                if isinstance(markdown_path, str) and markdown_path.startswith('#'):
+                    logger.info(f"Skipping commented page: {page}")
                     continue
-                    
-                with open(markdown_path, 'r', encoding='utf-8') as f:
+                
+                # Resolve path relative to config directory
+                resolved_path = self._resolve_path(markdown_path)
+                
+                with open(resolved_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                     md = markdown.Markdown(extensions=['meta', 'fenced_code', 'codehilite'])
                     body = md.convert(content)
@@ -727,13 +728,16 @@ class StaticSiteGenerator:
                 # Extract metadata
                 title = md.Meta.get('title', [page])[0]
                 description = md.Meta.get('description', [''])[0]
-                tags = md.Meta.get('tags', [])[0].split(',') if 'tags' in md.Meta else []
-                tags = [tag.strip() for tag in tags]
+                tags = []
+                if 'tags' in md.Meta:
+                    tags = [tag.strip() for tag in md.Meta['tags'][0].split(',')]
                 date = md.Meta.get('date', [''])[0]
+                
+                logger.debug(f"Extracted metadata for {page}: title='{title}', tags={tags}")
                 
                 # Store page info in tag database
                 page_url = os.path.relpath(os.path.join(self.build_dir, f"{page}.html"), self.build_dir)
-                self.tag_db[os.path.join(self.build_dir, f"{page}.html")] = {
+                page_info = {
                     'title': title,
                     'description': description,
                     'tags': tags,
@@ -741,6 +745,10 @@ class StaticSiteGenerator:
                     'url': page_url
                 }
                 
+                # Process tags
+                tag_processor.process_tags(resolved_path, page_info)
+                
+                # Render page
                 rendered_page = self.env.get_template("base.jinja").render(
                     recipe=self.recipe, 
                     body=body, 
@@ -755,6 +763,7 @@ class StaticSiteGenerator:
                 logger.info(f"Generated page: {page}.html")
             except Exception as e:
                 logger.error(f"Error generating page {page}: {e}")
+                raise
     
     def _generate_css(self):
         """Generate CSS file from Jinja template."""
@@ -848,156 +857,6 @@ class StaticSiteGenerator:
                         logger.info(f"Copied favicon: {favicon}")
                     except Exception as e:
                         logger.error(f"Error copying favicon {favicon}: {e}")
-    
-    def _generate_blog_pages(self, blog_processor: BlogProcessor):
-        """Generate blog pages."""
-        env = Environment(
-            loader=FileSystemLoader(
-                os.path.join(os.path.dirname(__file__), "constants/jinja_templates")
-            ),
-            autoescape=select_autoescape()
-        )
-        base_template = env.get_template("base.jinja")
-        blog_template = env.get_template("back_base.jinja")
-        
-        # Blog collection page
-        blog_body = blog_processor.generate_blog_collection_page()
-        rendered_blog_collection = base_template.render(
-            recipe=self.recipe,
-            body=blog_body,
-            back=" ",
-            version=__version__
-        )
-        
-        with open(os.path.join(self.build_dir, "blogs.html"), "w", encoding='utf-8') as f:
-            f.write(rendered_blog_collection)
-        
-        # Individual blog pages
-        blog_dir = os.path.join(self.build_dir, "blog")
-        os.makedirs(blog_dir, exist_ok=True)
-        
-        for blog_file, blog_content in blog_processor.generate_standalone_blog_pages():
-            rendered_blog = blog_template.render(
-                recipe=self.recipe,
-                body=blog_content,
-                back="."
-            )
-            
-            blog_output_path = os.path.join(blog_dir, blog_file)
-            try:
-                with open(blog_output_path, "w", encoding='utf-8') as f:
-                    f.write(rendered_blog)
-                
-                # Extract metadata
-                title = blog_content.split('<h1>')[1].split('</h1>')[0]
-                description = blog_content.split('<p>')[1].split('</p>')[0]
-                date = blog_content.split('<span class="blog-date">')[1].split('</span>')[0]
-                tags = []
-                
-                # Store page info in tag database
-                page_url = os.path.relpath(blog_output_path, self.build_dir)
-                self.tag_db[blog_output_path] = {
-                    'title': title,
-                    'description': description,
-                    'tags': tags,
-                    'date': date,
-                    'url': page_url
-                }
-            except Exception as e:
-                logger.error(f"Error generating blog post page for {blog_file}: {e}")
-    
-    def _process_tags(self):
-        """Process and generate tag pages."""
-        logger.info("Processing tags from all content")
-        
-        # Debug: Print tag database
-        logger.debug("Tag Database Contents:")
-        for path, info in self.tag_db.items():
-            logger.debug(f"Path: {path}")
-            logger.debug(f"Info: {info}")
-        
-        # Collect all tags and their associated pages
-        tag_pages = {}
-        for page_info in self.tag_db.values():
-            for tag in page_info.get('tags', []):
-                if tag not in tag_pages:
-                    tag_pages[tag] = []
-                tag_pages[tag].append({
-                    'title': page_info.get('title', ''),
-                    'description': page_info.get('description', ''),
-                    'url': page_info.get('url', ''),
-                    'date': page_info.get('date', '')
-                })
-        
-        # Debug: Print collected tags
-        logger.debug("Collected Tags:")
-        logger.debug(tag_pages)
-        
-        # Generate tag pages
-        tag_template = self.env.get_template('tag_page.jinja')
-        tags_dir = os.path.join(self.build_dir, 'tags')
-        os.makedirs(tags_dir, exist_ok=True)
-        
-        for tag, pages in tag_pages.items():
-            output_path = os.path.join(tags_dir, f"{tag}.html")
-            try:
-                # Sort pages by date if available
-                pages.sort(key=lambda x: x.get('date', ''), reverse=True)
-                
-                # Debug: Print context for tag page
-                logger.debug(f"Rendering tag page for {tag}")
-                logger.debug(f"Pages: {pages}")
-                logger.debug(f"Recipe: {self.recipe}")
-                
-                # Render tag page
-                html_content = tag_template.render(
-                    tag=tag,
-                    pages=pages,
-                    recipe=self.recipe,  # Pass recipe instead of site
-                    site=self.recipe.get('site', {}),
-                    style=self.style_config
-                )
-                
-                # Write tag page
-                with open(output_path, 'w', encoding='utf-8') as f:
-                    f.write(html_content)
-                logger.info(f"Generated tag page: {tag}.html")
-                
-            except Exception as e:
-                logger.error(f"Error generating tag page for '{tag}': {str(e)}")
-                logger.debug(f"Template context: tag={tag}, pages={pages}, recipe={self.recipe}, style={self.style_config}")
-                continue
-        
-        # Generate tags index
-        try:
-            tags_template = self.env.get_template('tags_index.jinja')
-            tags_index_path = os.path.join(self.build_dir, 'tags.html')
-            
-            # Sort tags alphabetically
-            sorted_tags = sorted(tag_pages.keys())
-            
-            # Debug: Print context for tags index
-            logger.debug("Rendering tags index")
-            logger.debug(f"Tags: {sorted_tags}")
-            logger.debug(f"Tag counts: {tag_pages}")
-            
-            # Render tags index
-            html_content = tags_template.render(
-                tags=sorted_tags,
-                tag_counts={tag: len(pages) for tag, pages in tag_pages.items()},
-                recipe=self.recipe,  # Pass recipe here too
-                site=self.recipe.get('site', {}),
-                style=self.style_config
-            )
-            
-            # Write tags index
-            with open(tags_index_path, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            logger.info("Generated tags index page")
-            
-        except Exception as e:
-            logger.error(f"Error generating tags index: {str(e)}")
-            logger.debug(f"Template context: tags={sorted_tags}, recipe={self.recipe}, style={self.style_config}")
 
 class ssg(StaticSiteGenerator):
     """
@@ -1013,3 +872,15 @@ class ssg(StaticSiteGenerator):
             build (str, optional): Build directory path
         """
         super().__init__(recipe, build)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python ssg.py <site_config> [style_config] [build_dir]")
+        sys.exit(1)
+    
+    site_config = sys.argv[1]
+    style_config = sys.argv[2] if len(sys.argv) > 2 else None
+    build_dir = sys.argv[3] if len(sys.argv) > 3 else None
+    
+    generator = StaticSiteGenerator(site_config, style_config, build_dir)
+    generator.generate()

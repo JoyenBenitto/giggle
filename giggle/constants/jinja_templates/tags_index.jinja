@@ -21,9 +21,25 @@
 
 <style>
     .tags-container {
-        max-width: 1200px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 2rem;
+    }
+
+    .tags-container h1 {
+        margin: 0;
+        margin-bottom: 1rem;
+        color: var(--header-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+    }
+
+    .tags-container p {
+        color: var(--text-muted);
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 400;
     }
 
     .tags-grid {
@@ -39,26 +55,50 @@
     }
 
     .tag-card {
-        background-color: {{ recipe.style.colors.background_secondary }};
-        border-radius: 8px;
-        padding: 1.5rem;
-        transition: transform 0.2s ease;
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        border: 1px solid var(--tag-bg);
     }
 
     .tag-card:hover {
-        transform: translateY(-3px);
+        transform: translateY(-4px);
+        background: var(--card-hover);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
     .tag-card h3 {
         margin: 0;
-        color: {{ recipe.style.colors.text }};
+        margin-bottom: 0.5rem;
+        color: var(--header-color);
+        font-size: 1.25rem;
+        font-weight: 600;
     }
 
     .tag-count {
-        display: inline-block;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: {{ recipe.style.colors.text_secondary }};
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+        .tags-container {
+            padding: 1rem;
+        }
+
+        .tags-container h1 {
+            font-size: 2rem;
+        }
+
+        .tags-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .tag-card {
+            padding: 1.25rem;
+        }
     }
 </style>
 {% endblock %}

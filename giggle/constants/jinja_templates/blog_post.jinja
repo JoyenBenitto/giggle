@@ -12,7 +12,7 @@
             {% if tags %}
             <div class="post-tags">
                 {% for tag in tags %}
-                <a href="../tags/{{ tag }}.html" class="tag">{{ tag }}</a>
+                <a href="../../tags/{{ tag }}.html" class="tag">{{ tag }}</a>
                 {% endfor %}
             </div>
             {% endif %}
@@ -25,11 +25,22 @@
     </div>
 
     <footer class="post-footer">
-        <a href="../blogs.html" class="back-link">← Back to Blog</a>
+        <a href="../../blogs.html" class="back-link">← Back to Blog</a>
     </footer>
 </article>
 
 <style>
+    :root {
+        --text-color: #e2e8f0;
+        --text-muted: #94a3b8;
+        --card-bg: #1e293b;
+        --card-hover: #2d3f59;
+        --tag-bg: #334155;
+        --tag-text: #94a3b8;
+        --tag-bg-hover: #475569;
+        --header-color: #f1f5f9;
+    }
+
     .blog-post {
         max-width: 800px;
         margin: 0 auto;
@@ -44,97 +55,220 @@
     .post-header h1 {
         margin: 0;
         margin-bottom: 1rem;
-        color: {{ style.colors.text }};
+        color: var(--text-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
     }
 
     .post-meta {
-        color: {{ style.colors.text_secondary }};
-        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-top: 1rem;
     }
 
     .post-tags {
         margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .tag {
         display: inline-block;
-        padding: 0.2rem 0.8rem;
-        margin: 0.2rem;
-        background-color: {{ style.colors.background_secondary }};
-        color: {{ style.colors.text_secondary }};
+        padding: 0.4rem 1rem;
+        background: var(--tag-bg);
+        color: var(--tag-text);
         text-decoration: none;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
         transition: all 0.2s ease;
+        font-weight: 500;
+        border: 1px solid transparent;
     }
 
     .tag:hover {
-        background-color: {{ style.colors.primary }};
-        color: {{ style.colors.text }};
+        background: var(--tag-bg-hover);
+        color: var(--text-color);
+        border-color: var(--text-muted);
     }
 
     .post-content {
-        line-height: 1.6;
-        color: {{ style.colors.text }};
+        line-height: 1.7;
+        font-size: 1.1rem;
+        color: var(--text-color);
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .post-content h2,
     .post-content h3,
     .post-content h4 {
-        margin-top: 2rem;
-        color: {{ style.colors.text }};
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--header-color);
+        font-weight: 600;
+    }
+
+    .post-content h2 {
+        font-size: 1.875rem;
+    }
+
+    .post-content h3 {
+        font-size: 1.5rem;
+    }
+
+    .post-content h4 {
+        font-size: 1.25rem;
     }
 
     .post-content p {
-        margin: 1rem 0;
+        margin: 1.25rem 0;
     }
 
+    /* Image container */
+    .post-content figure {
+        margin: 2rem 0;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Image styling */
     .post-content img {
         max-width: 100%;
         height: auto;
-        border-radius: 8px;
-        margin: 1.5rem 0;
+        border-radius: 0.5rem;
+        margin: 0;
+        display: block;
+        object-fit: contain;
+    }
+
+    /* Image caption */
+    .post-content figcaption {
+        margin-top: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    /* Handle inline images */
+    .post-content p img {
+        max-width: 100%;
+        height: auto;
+        margin: 2rem 0;
+        display: block;
+    }
+
+    /* Tables that might contain images */
+    .post-content table {
+        width: 100%;
+        max-width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+        overflow-x: auto;
+        display: block;
+    }
+
+    .post-content table img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .post-content td,
+    .post-content th {
+        padding: 0.75rem;
+        border: 1px solid var(--tag-bg);
     }
 
     .post-content code {
-        background-color: {{ style.colors.background_secondary }};
+        background: var(--card-bg);
         padding: 0.2rem 0.4rem;
-        border-radius: 4px;
-        font-family: monospace;
+        border-radius: 0.25rem;
+        font-size: 0.9em;
+        font-family: 'JetBrains Mono', monospace;
     }
 
     .post-content pre {
-        background-color: {{ style.colors.background_secondary }};
-        padding: 1rem;
-        border-radius: 8px;
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
         overflow-x: auto;
+        margin: 1.5rem 0;
     }
 
     .post-content pre code {
-        background-color: transparent;
+        background: none;
         padding: 0;
+        font-size: 0.9rem;
+        line-height: 1.7;
     }
 
     .post-content blockquote {
+        border-left: 4px solid var(--tag-bg);
         margin: 1.5rem 0;
-        padding-left: 1rem;
-        border-left: 4px solid {{ style.colors.primary }};
-        color: {{ style.colors.text_secondary }};
+        padding: 0.5rem 0 0.5rem 1.5rem;
+        font-style: italic;
+        color: var(--text-muted);
+    }
+
+    .post-content ul,
+    .post-content ol {
+        margin: 1.25rem 0;
+        padding-left: 1.5rem;
+    }
+
+    .post-content li {
+        margin: 0.5rem 0;
     }
 
     .post-footer {
-        margin-top: 3rem;
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--tag-bg);
         text-align: center;
     }
 
     .back-link {
-        color: {{ style.colors.primary }};
+        display: inline-block;
+        color: var(--text-muted);
         text-decoration: none;
         font-weight: 500;
+        transition: color 0.2s ease;
     }
 
     .back-link:hover {
-        text-decoration: underline;
+        color: var(--text-color);
+    }
+
+    @media (max-width: 768px) {
+        .blog-post {
+            padding: 1rem;
+        }
+
+        .post-header h1 {
+            font-size: 2rem;
+        }
+
+        .post-content {
+            font-size: 1rem;
+        }
+
+        .post-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .post-content h3 {
+            font-size: 1.25rem;
+        }
+
+        .post-content h4 {
+            font-size: 1.125rem;
+        }
     }
 </style>
 {% endblock %}

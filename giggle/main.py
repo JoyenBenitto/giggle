@@ -152,11 +152,7 @@ def directory_setup(build, config):
 def cli():
     ''' Command-line interface for giggle your personal site manager'''
 
-@click.option(
-    '--site-config',
-    help='Path to the site configuration YAML',
-    required=True
-)
+@click.argument('site_config', type=click.Path(exists=True))
 @click.option(
     '--style-config',
     help='Path to the style configuration YAML',

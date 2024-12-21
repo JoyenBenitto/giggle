@@ -39,11 +39,12 @@
     .back-to-tags {
         display: inline-block;
         margin-top: 1rem;
-        color: {{ style.colors.primary }};
+        color: var(--text-color);
         text-decoration: none;
     }
 
     .back-to-tags:hover {
+        color: var(--text-muted);
         text-decoration: underline;
     }
 
@@ -54,40 +55,61 @@
     }
 
     .post-card {
-        background-color: {{ style.colors.background_secondary }};
-        border-radius: 8px;
-        padding: 1.5rem;
-        transition: transform 0.2s ease;
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        border: 1px solid var(--tag-bg);
     }
 
     .post-card:hover {
-        transform: translateY(-3px);
+        transform: translateY(-4px);
+        background: var(--card-hover);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
     .post-card h2 {
         margin: 0;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        line-height: 1.4;
     }
 
     .post-card h2 a {
-        color: {{ style.colors.text }};
+        color: var(--header-color);
         text-decoration: none;
+        transition: color 0.2s ease;
     }
 
     .post-card h2 a:hover {
-        color: {{ style.colors.primary }};
+        color: var(--text-muted);
     }
 
     .post-date {
-        color: {{ style.colors.text_secondary }};
+        color: var(--text-muted);
         font-size: 0.9rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
     }
 
     .post-description {
-        color: {{ style.colors.text_secondary }};
+        color: var(--text-color);
         margin: 0;
-        line-height: 1.5;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .tag-page {
+            padding: 1rem;
+        }
+
+        .post-card {
+            padding: 1.25rem;
+        }
+
+        .post-card h2 {
+            font-size: 1.25rem;
+        }
     }
 </style>
 {% endblock %}
