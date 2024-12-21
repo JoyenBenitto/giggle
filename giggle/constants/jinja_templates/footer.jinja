@@ -1,12 +1,31 @@
+{# Footer template with dynamic content #}
+
 <footer>
-    <div class="footer-bottom">
+    <div class="footer-content">
+        {% if recipe.site.social_links %}
         <div class="social-links">
-            <a href="https://github.com/JoyenBenitto" class="social-icon">GitHub</a>
-            <a href="https://www.linkedin.com/in/joyen-benitto" class="social-icon">LinkedIn</a>
-            <a href="https://twitter.com/JoyenBenitto" class="social-icon">Twitter</a>
+            {% for platform, url in recipe.site.social_links.items() %}
+            <a href="{{ url }}" class="social-icon" target="_blank" rel="noopener noreferrer">
+                {{ platform }}
+            </a>
+            {% endfor %}
         </div>
+        {% endif %}
+        
         <div class="copyright">
-            2024 Joyen Benitto. All Rights Reserved.
+            {{ recipe.site.copyright | default('2024') }} 
+            {{ recipe.site.author | default('') }}
+            {% if recipe.site.copyright_text %}
+            {{ recipe.site.copyright_text }}
+            {% else %}
+            All Rights Reserved.
+            {% endif %}
         </div>
+        
+        {% if recipe.site.footer_text %}
+        <div class="footer-text">
+            {{ recipe.site.footer_text }}
+        </div>
+        {% endif %}
     </div>
 </footer>

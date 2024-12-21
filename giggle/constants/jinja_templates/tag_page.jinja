@@ -1,0 +1,93 @@
+{% extends "base.jinja" %}
+
+{% block title %}{{ tag }} - {{ recipe.site.title }}{% endblock %}
+
+{% block content %}
+<div class="tag-page">
+    <header class="tag-header">
+        <h1>Posts tagged with "{{ tag }}"</h1>
+        <a href="../tags.html" class="back-to-tags">← All Tags</a>
+    </header>
+
+    <div class="posts-list">
+        {% for post in pages %}
+        <article class="post-card">
+            <h2><a href="../{{ post.url }}">{{ post.title }}</a></h2>
+            {% if post.date %}
+            <div class="post-date">{{ post.date }}</div>
+            {% endif %}
+            {% if post.description %}
+            <p class="post-description">{{ post.description }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .tag-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .tag-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .back-to-tags {
+        display: inline-block;
+        margin-top: 1rem;
+        color: {{ style.colors.primary }};
+        text-decoration: none;
+    }
+
+    .back-to-tags:hover {
+        text-decoration: underline;
+    }
+
+    .posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .post-card {
+        background-color: {{ style.colors.background_secondary }};
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: transform 0.2s ease;
+    }
+
+    .post-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .post-card h2 {
+        margin: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .post-card h2 a {
+        color: {{ style.colors.text }};
+        text-decoration: none;
+    }
+
+    .post-card h2 a:hover {
+        color: {{ style.colors.primary }};
+    }
+
+    .post-date {
+        color: {{ style.colors.text_secondary }};
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .post-description {
+        color: {{ style.colors.text_secondary }};
+        margin: 0;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,51 @@
+# Sample Site Configuration
+
+# Site Metadata
+site:
+  title: "My Personal Website"
+  description: "A showcase of my work and thoughts"
+  author: "Your Name"
+  url: "https://example.com"
+
+# Navigation Configuration
+navigation:
+  - name: "Home"
+    link: "/"
+    page: index
+
+  - name: "Blog"
+    link: "/blog"
+    path: ./sample_markdowns/blog/
+    enabled: true
+
+  - name: "Projects"
+    link: "/projects"
+    page: projects
+
+  - name: "About"
+    link: "/about"
+    page: about
+
+# Content Pages
+pages:
+  index: ./sample_markdowns/main.md
+  about: ./sample_markdowns/about.md
+  projects: ./sample_markdowns/projects.md
+
+# Feature Toggles
+features:
+  tags: true
+  dark_mode: true
+  search: true
+  rss: true
+  tag_pages: true
+  blog_pages: true
+
+# Assets to Move
+assets:
+  - source: "images/*"
+    destination: "images/"
+  - source: "js/*.js"
+    destination: "js/"
+  - source: "css/*.css"
+    destination: "css/"

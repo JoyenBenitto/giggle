@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tag Index</title>
+    <style>
+        body {
+            font-family: {{ typography.font_family.body | default('"Inter", sans-serif') }};
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: {{ styles.dark_mode.background_color | default('#121212') }};
+            color: {{ styles.dark_mode.text_color | default('#E0E0E0') }};
+        }
+        a {
+            color: {{ styles.dark_mode.primary_color | default('#2196F3') }};
+        }
+        /* Additional styling with explicit fallbacks */
+    </style>
+</head>
+<body>
+    <h1>Tag Index</h1>
+    <div>
+        {% for tag, tag_info in tag_db.items() %}
+            <a href="./tags/{{ tag }}.html">{{ tag_info['display_name'] }}</a>
+        {% endfor %}
+    </div>
+</body>
+</html>

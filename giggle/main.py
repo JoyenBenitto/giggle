@@ -1,33 +1,8 @@
-# ============================================================================
-# INCORE SEMICONDUCTORS PVT. LTD. Confidential
-# Copyright (c) 2022-2024, INCORE SEMICONDUCTORS PVT. LTD.
-# Project Name: device_manager 
-# Project URL : https://gitlab.incoresemi.com/soc-utils/device_manager
-# ============================================================================
-#
-# In the following text COMPANY refers to INCORE SEMICONDUCTORS PVT. LTD.
-#
-# The information contained herein is the proprietary and confidential 
-# information of COMPANY or its licensors, and is supplied subject to, and may 
-# be used only in accordance with, previously executed agreements with incore.        
-#
-# Except as may otherwise be agreed in writing: 
-#
-# (1) All materials furnished by COMPANY hereunder are provided "as is" 
-#     without warranty of any kind. 
-# (2) COMPANY specifically disclaims any warranty  relating to  fitness for a
-#     particular purpose or merchantability or infringement of any patent, 
-#     copyright or other intellectual property right. and 
-# (3) COMPANY will not be liable for any costs of procurement of substitutes, 
-#     loss of profits, interruption of business, or for any other special, 
-#     consequential or incidental damages, however caused, whether for breach 
-#     of warranty, contract, tort, negligence, strict liability or otherwise.
-# ============================================================================
-
-
 import os
+import sys
 import click
 import logging
+from pathlib import Path
 import shutil
 from giggle import ssg
 from giggle import utils
@@ -35,6 +10,13 @@ from giggle.__init__ import __version__
 from ruamel.yaml import YAML
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)-8s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 logger = logging.getLogger(__name__)
 
@@ -171,9 +153,14 @@ def cli():
     ''' Command-line interface for giggle your personal site manager'''
 
 @click.option(
-    '--recipe',
-    help='Path to the giggle recipe',
+    '--site-config',
+    help='Path to the site configuration YAML',
     required=True
+)
+@click.option(
+    '--style-config',
+    help='Path to the style configuration YAML',
+    required=False
 )
 @click.option(
     '--verbose',
@@ -191,19 +178,9 @@ def cli():
     show_default=True,
     required=False
 )
-@click.option(
-    '--no_clear',
-    is_flag=True,
-    help="Disables clone and clearing the dir"
-)
-@click.option(
-    '--production',
-    is_flag=True,
-    help="generates production html"
-)
 @cli.command()
-def cook(build_dir, recipe, verbose, no_clear):
-    """Cooks a yummy website from the provided recipe"""
+def cook(site_config, style_config, build_dir, verbose):
+    """Cooks a yummy website from the provided configuration"""
 
     logging.root.setLevel(verbose.upper())
     logger = logging.getLogger()
@@ -215,17 +192,14 @@ def cook(build_dir, recipe, verbose, no_clear):
     logger.info('************ Giggle Static Site Generator ************ ')
     logger.info('\n\n')
 
-    # directory setup
-    utils.directory_setup(build_dir, recipe)
-    # Creating the build directory
-    if os.path.exists(build_dir):
-        shutil.rmtree(build_dir)
-    logger.info("building...")
-    os.makedirs(build_dir, exist_ok=True)
-    recipe = utils.load_yaml(recipe)
-    shutil.copy(f"{here}/constants/other_const/.htaccess", f"{build_dir}/.htaccess")
-    shutil.copy(f"{here}/constants/other_const/vercel.json", f"{build_dir}/vercel.json")
-    ssg_inst = ssg.ssg(recipe=recipe, build=build_dir)
+    # Create the static site generator with both configs
+    ssg_inst = ssg.StaticSiteGenerator(
+        site_config=site_config, 
+        style_config=style_config, 
+        build_dir=build_dir
+    )
+    
+    # Generate the site
     ssg_inst.generate()
 
 if __name__ == '__main__':

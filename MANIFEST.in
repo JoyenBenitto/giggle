@@ -1,0 +1,13 @@
+include LICENSE
+include README.md
+include CHANGELOG.md
+
+recursive-include giggle/constants/jinja_templates *.jinja
+recursive-include giggle/constants/css *.css
+recursive-include giggle/constants/js *.js
+recursive-include sample_config *.yaml *.md
+
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .DS_Store

@@ -1,0 +1,118 @@
+# Color Palette (Dark Theme)
+colors:
+  primary: "#2196F3"  # Vibrant blue accent
+  background: "#121212"  # Deep dark background
+  background_secondary: "#1E1E1E"  # Slightly lighter for content areas
+  text: "#E0E0E0"  # Light gray for primary text
+  text_secondary: "#A0A0A0"  # Muted gray for secondary text
+  accent: "#64B5F6"  # Lighter blue for hover and interactions
+
+# Typography
+typography:
+  font_family:
+    body: '"Inter", sans-serif'
+    headers: '"Roboto", sans-serif'
+  sizes:
+    body: 16px
+    headers:
+      h1: 1.8rem
+      h2: 1.5rem
+      h3: 1.3rem
+      h4: 1.2rem
+      h5: 1.1rem
+      h6: 1rem
+  line_height:
+    body: 1.6
+    headers: 1.3
+
+# Component Styles
+styles:
+  _body:
+    bg_color: "{colors.background}"
+    color: "{colors.text}"
+    font_family: "{typography.font_family.body}"
+    line_height: "{typography.line_height.body}"
+
+  _main:
+    bg_color: "{colors.background_secondary}"
+    border_radius: 8px
+    box_shadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+
+  _links:
+    color: "{colors.primary}"
+    hover_color: "{colors.accent}"
+    text_decoration: "none"
+    transition: "color 0.3s ease"
+
+  _headers:
+    color: "{colors.text}"
+    font_family: "{typography.font_family.headers}"
+    font_weight: 600
+    font_style: normal
+    margin_bottom: 1rem
+
+  _blockquote:
+    border_color: "{colors.primary}"
+    color: "{colors.text_secondary}"
+    background_color: "rgba(33, 150, 243, 0.1)"
+    border_left: "4px solid {colors.primary}"
+    padding: 1rem
+
+  _tags:
+    color: "{colors.primary}"
+    background_color: "rgba(33, 150, 243, 0.2)"
+    border_radius: 4px
+    margin:
+      top: 0
+      right: 0
+      bottom: 1
+      left: 0
+    padding:
+      top: 0.5
+      right: 0.5
+      bottom: 0.5
+      left: 0.5
+    hover:
+      background_color: "rgba(33, 150, 243, 0.3)"
+
+  _list_items:
+    symbol: "▶"
+    symbol_color: "{colors.primary}"
+    marker_spacing: 0.5rem
+
+  _navbar:
+    font_family: "{typography.font_family.body}"
+    background_color: "{colors.background_secondary}"
+    color: "{colors.text}"
+    box_shadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+
+  _footer:
+    color: "{colors.text_secondary}"
+    font_family: "{typography.font_family.body}"
+    background_color: "{colors.background_secondary}"
+    border_top: "1px solid rgba(255, 255, 255, 0.1)"
+
+# Modular Component Configuration
+components:
+  body: "{styles._body}"
+  main: "{styles._main}"
+  links: "{styles._links}"
+  headers: "{styles._headers}"
+  blockquotes: "{styles._blockquote}"
+  tags: "{styles._tags}"
+  list_items: "{styles._list_items}"
+  navbar: "{styles._navbar}"
+  footer: "{styles._footer}"
+
+# Table Styling
+table:
+  enable: true
+  border_color: "#2C2C2C"
+  header_bg_color: "#1E1E1E"
+  row_hover_color: "rgba(33, 150, 243, 0.1)"
+
+# Image Styling
+image:
+  enable: true
+  border_radius: 8px
+  box_shadow: "0 4px 6px rgba(0, 0, 0, 0.2)"
