@@ -1,60 +1,129 @@
 {% extends "base.jinja" %}
 
+{% block title %}Blog - {{ recipe.site.title }}{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1 class="blog_headings">Blog Posts</h1>
-    
-    <div class="blog-list">
-        {% for post in blog_posts %}
-        <article class="blog-preview">
-            <h2><a href="blog_{{ post.file | replace('.md', '') }}.html">{{ post.title }}</a></h2>
-            <div class="post-meta">
-                <span class="date">{{ post.date }}</span>
+<div class="blog-index">
+    <header class="blog-header">
+        <h1>Blog Posts</h1>
+        <p>Latest thoughts and updates</p>
+    </header>
+
+    <div class="posts-grid">
+        {% for post in posts %}
+        <article class="post-card">
+            <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+            {% if post.date %}
+            <div class="post-date">{{ post.date }}</div>
+            {% endif %}
+            {% if post.description %}
+            <p class="post-description">{{ post.description }}</p>
+            {% endif %}
+            {% if post.tags %}
+            <div class="post-tags">
+                {% for tag in post.tags %}
+                <a href="tags/{{ tag }}.html" class="tag">{{ tag }}</a>
+                {% endfor %}
             </div>
-            <p class="description">{{ post.description }}</p>
-            <a href="blog_{{ post.file | replace('.md', '') }}.html" class="read-more">Read More →</a>
+            {% endif %}
         </article>
         {% endfor %}
     </div>
 </div>
 
 <style>
-.blog-list {
-    margin-top: 2rem;
-}
+    .blog-index {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
 
-.blog-preview {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background-color: var(--color-background-secondary);
-    border-radius: 8px;
-    transition: transform 0.2s ease;
-}
+    .blog-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
 
-.blog-preview:hover {
-    transform: translateY(-2px);
-}
+    .blog-header h1 {
+        margin: 0;
+        margin-bottom: 0.5rem;
+        color: {{ style.colors.text }};
+    }
 
-.post-meta {
-    margin: 0.5rem 0;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-}
+    .blog-header p {
+        color: {{ style.colors.text_secondary }};
+        font-size: 1.1rem;
+        margin: 0;
+    }
 
-.description {
-    margin: 1rem 0;
-}
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
 
-.read-more {
-    display: inline-block;
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
+    .post-card {
+        background-color: {{ style.colors.background_secondary }};
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: transform 0.2s ease;
+    }
 
-.read-more:hover {
-    color: var(--color-accent);
-}
+    .post-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .post-card h2 {
+        margin: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.4rem;
+    }
+
+    .post-card h2 a {
+        color: {{ style.colors.text }};
+        text-decoration: none;
+    }
+
+    .post-card h2 a:hover {
+        color: {{ style.colors.primary }};
+    }
+
+    .post-date {
+        color: {{ style.colors.text_secondary }};
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .post-description {
+        color: {{ style.colors.text_secondary }};
+        margin: 0.5rem 0;
+        line-height: 1.5;
+    }
+
+    .post-tags {
+        margin-top: 1rem;
+    }
+
+    .tag {
+        display: inline-block;
+        padding: 0.2rem 0.8rem;
+        margin: 0.2rem;
+        background-color: {{ style.colors.background }};
+        color: {{ style.colors.text_secondary }};
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .tag:hover {
+        background-color: {{ style.colors.primary }};
+        color: {{ style.colors.text }};
+    }
+
+    @media (max-width: 768px) {
+        .posts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}

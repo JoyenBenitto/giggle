@@ -2,30 +2,13 @@
 
 <footer>
     <div class="footer-content">
-        {% if recipe.site.social_links %}
-        <div class="social-links">
-            {% for platform, url in recipe.site.social_links.items() %}
-            <a href="{{ url }}" class="social-icon" target="_blank" rel="noopener noreferrer">
-                {{ platform }}
-            </a>
+        <div class="copyright">
+            {{ recipe.site.copyright | default('2024') }} {{ recipe.site.author | default('') }}
+        </div>
+        <div class="footer-links">
+            {% for name, url in recipe.site.social_links.items() %}
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ name }}</a>
             {% endfor %}
         </div>
-        {% endif %}
-        
-        <div class="copyright">
-            {{ recipe.site.copyright | default('2024') }} 
-            {{ recipe.site.author | default('') }}
-            {% if recipe.site.copyright_text %}
-            {{ recipe.site.copyright_text }}
-            {% else %}
-            All Rights Reserved.
-            {% endif %}
-        </div>
-        
-        {% if recipe.site.footer_text %}
-        <div class="footer-text">
-            {{ recipe.site.footer_text }}
-        </div>
-        {% endif %}
     </div>
 </footer>

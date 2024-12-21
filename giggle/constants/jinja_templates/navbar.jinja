@@ -1,19 +1,17 @@
 {# Navigation template with modern styling #}
 
 <nav class="navbar">
-    <div class="nav-content">
-        <a href="./index.html" class="nav-brand">
-            {{ recipe.site.title | default('My Website') }}
-        </a>
-        
-        <ul class="nav-links">
-            {% for item in recipe.navigation %}
-            <li>
-                <a href="{{ item.url }}" class="nav-link">
-                    {{ item.title }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
+    <div class="nav-brand">
+        <a href="index.html">{{ recipe.site.title | default('My Website') }}</a>
+    </div>
+
+    <button class="nav-toggle" aria-label="Toggle navigation">
+        <span class="hamburger"></span>
+    </button>
+
+    <div class="nav-links">
+        {% for item in recipe.navigation %}
+            <a href="{{ item.url }}" class="nav-link">{{ item.title }} →</a>
+        {% endfor %}
     </div>
 </nav>

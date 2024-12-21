@@ -1,0 +1,47 @@
+// Navigation Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    const body = document.body;
+    
+    if (!navToggle || !navLinks) return;
+
+    function toggleMenu(show) {
+        navLinks.classList.toggle('active', show);
+        navToggle.setAttribute('aria-expanded', show);
+        body.style.overflow = show ? 'hidden' : '';
+    }
+
+    // Toggle menu when hamburger is clicked
+    navToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+        toggleMenu(!isExpanded);
+    });
+
+    // Close menu when clicking a link
+    navLinks.addEventListener('click', function(e) {
+        if (e.target.classList.contains('nav-link')) {
+            toggleMenu(false);
+        }
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+            toggleMenu(false);
+        }
+    });
+
+    // Close menu when pressing Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            toggleMenu(false);
+        }
+    });
+
+    // Add aria attributes
+    navToggle.setAttribute('aria-controls', 'nav-links');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navLinks.id = 'nav-links';
+});

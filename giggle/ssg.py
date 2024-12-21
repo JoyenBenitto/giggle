@@ -605,82 +605,109 @@ class StaticSiteGenerator:
             logger.error(f"Error during site generation: {e}")
             raise
     
-    def _process_blog_directory(self, blog_dir):
-        """Process all markdown files in the blog directory."""
+    def _process_blog_directory(self, blog_dir: str) -> None:
+        """Process a directory of blog posts."""
         logger.info(f"Processing blog directory: {blog_dir}")
-        blog_posts = []
         
         try:
             # Get all markdown files in the blog directory
             blog_files = [f for f in os.listdir(blog_dir) if f.endswith('.md')]
             logger.info(f"Found blog files: {blog_files}")
             
+            # Process each blog post
+            blog_posts = []
             for blog_file in blog_files:
-                file_path = os.path.join(blog_dir, blog_file)
+                blog_path = os.path.join(blog_dir, blog_file)
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    # Read and parse blog post
+                    with open(blog_path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        md = markdown.Markdown(extensions=['meta', 'fenced_code', 'codehilite'])
-                        html_content = md.convert(content)
-                        
-                        # Extract metadata
-                        title = md.Meta.get('title', [os.path.splitext(blog_file)[0]])[0]
-                        description = md.Meta.get('description', [''])[0]
-                        date = md.Meta.get('date', [''])[0]
-                        
-                        blog_posts.append({
-                            'title': title,
-                            'description': description,
-                            'date': date,
-                            'content': html_content,
-                            'file': blog_file
-                        })
-                        logger.info(f"Processed blog post: {title}")
-                except Exception as e:
-                    logger.error(f"Error processing blog post {file_path}: {e}")
-            
-            # Sort blog posts by date (newest first)
-            blog_posts.sort(key=lambda x: x['date'], reverse=True)
-            
-            # Generate blog index page
-            env = Environment(
-                loader=FileSystemLoader(
-                    os.path.join(os.path.dirname(__file__), "constants/jinja_templates")
-                )
-            )
-            blog_template = env.get_template("blog_index.jinja")
-            
-            rendered_page = blog_template.render(
-                recipe=self.recipe,
-                blog_posts=blog_posts
-            )
-            
-            # Write blog index page
-            output_path = os.path.join(self.build_dir, "blogs.html")
-            with open(output_path, "w", encoding='utf-8') as f:
-                f.write(rendered_page)
-            logger.info("Generated blog index page")
-            
-            # Generate individual blog post pages
-            blog_post_template = env.get_template("blog_post.jinja")
-            for post in blog_posts:
-                try:
-                    rendered_post = blog_post_template.render(
+                    
+                    # Parse markdown with metadata
+                    md = markdown.Markdown(extensions=['meta', 'fenced_code'])
+                    html_content = md.convert(content)
+                    meta = md.Meta
+                    
+                    # Extract metadata
+                    title = meta.get('title', [blog_file])[0]
+                    description = meta.get('description', [''])[0]
+                    date = meta.get('date', [''])[0]
+                    tags = meta.get('tags', [])[0].split(',') if 'tags' in meta else []
+                    tags = [tag.strip() for tag in tags]
+                    
+                    # Generate output path
+                    output_filename = os.path.splitext(blog_file)[0] + '.html'
+                    output_path = os.path.join(self.build_dir, 'blog', output_filename)
+                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                    
+                    # Store in tag database
+                    relative_url = os.path.join('blog', output_filename)
+                    self.tag_db[output_path] = {
+                        'title': title,
+                        'description': description,
+                        'tags': tags,
+                        'date': date,
+                        'url': relative_url
+                    }
+                    
+                    # Render blog post
+                    template = self.env.get_template('blog_post.jinja')
+                    rendered = template.render(
+                        content=html_content,
+                        title=title,
+                        description=description,
+                        date=date,
+                        tags=tags,
                         recipe=self.recipe,
-                        post=post
+                        site=self.recipe.get('site', {}),
+                        style=self.style_config
                     )
                     
-                    # Write blog post page
-                    post_file = os.path.join(self.build_dir, f"blog_{os.path.splitext(post['file'])[0]}.html")
-                    with open(post_file, "w", encoding='utf-8') as f:
-                        f.write(rendered_post)
-                    logger.info(f"Generated blog post page: {post['title']}")
-                except Exception as e:
-                    logger.error(f"Error generating blog post page for {post['title']}: {e}")
+                    # Write blog post
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        f.write(rendered)
                     
+                    # Add to blog posts list
+                    blog_posts.append({
+                        'title': title,
+                        'description': description,
+                        'date': date,
+                        'tags': tags,
+                        'url': relative_url
+                    })
+                    
+                    logger.info(f"Processed blog post: {title}")
+                    
+                except Exception as e:
+                    logger.error(f"Error processing blog post {blog_file}: {str(e)}")
+                    continue
+            
+            # Sort blog posts by date (newest first)
+            blog_posts.sort(key=lambda x: x.get('date', ''), reverse=True)
+            
+            # Generate blog index
+            try:
+                template = self.env.get_template('blog_index.jinja')
+                index_path = os.path.join(self.build_dir, 'blogs.html')
+                
+                rendered = template.render(
+                    posts=blog_posts,
+                    recipe=self.recipe,
+                    site=self.recipe.get('site', {}),
+                    style=self.style_config
+                )
+                
+                with open(index_path, 'w', encoding='utf-8') as f:
+                    f.write(rendered)
+                logger.info("Generated blog index page")
+                
+            except Exception as e:
+                logger.error(f"Error generating blog index: {str(e)}")
+            
         except Exception as e:
-            logger.error(f"Error processing blog directory {blog_dir}: {e}")
-
+            logger.error(f"Error processing blog directory: {str(e)}")
+            raise
+    
     def _generate_pages(self):
         """Generate HTML pages from markdown sources."""
         for page, markdown_path in self.recipe.get("pages", {}).items():
@@ -770,19 +797,57 @@ class StaticSiteGenerator:
         """Copy JavaScript and other static assets to build directory."""
         import shutil
         
-        assets_dir = os.path.join(os.path.dirname(__file__), "constants")
-        asset_extensions = ['.js', '.png', '.jpg', '.svg']
+        # Copy JavaScript files from templates
+        template_dir = os.path.join(os.path.dirname(__file__), "constants/jinja_templates")
+        js_files = [f for f in os.listdir(template_dir) if f.endswith('.js.jinja')]
         
-        for asset in os.listdir(assets_dir):
-            if any(asset.endswith(ext) for ext in asset_extensions):
-                src_path = os.path.join(assets_dir, asset)
-                dest_path = os.path.join(self.build_dir, asset)
+        for js_file in js_files:
+            try:
+                # Read the template
+                with open(os.path.join(template_dir, js_file), 'r', encoding='utf-8') as f:
+                    js_content = f.read()
                 
-                try:
-                    shutil.copy2(src_path, dest_path)
-                    logger.info(f"Copied asset: {asset}")
-                except Exception as e:
-                    logger.error(f"Error copying {asset}: {e}")
+                # Write to build directory without .jinja extension
+                output_file = os.path.join(self.build_dir, js_file.replace('.jinja', ''))
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    f.write(js_content)
+                
+                logger.info(f"Copied JavaScript file: {js_file}")
+            except Exception as e:
+                logger.error(f"Error copying JavaScript file {js_file}: {e}")
+        
+        # Copy other static assets
+        for asset_path in self.recipe.get('mover', []):
+            if not os.path.exists(asset_path):
+                logger.warning(f"Asset path does not exist: {asset_path}")
+                continue
+                
+            try:
+                if os.path.isdir(asset_path):
+                    # Copy directory
+                    dest_dir = os.path.join(self.build_dir, os.path.basename(asset_path))
+                    if os.path.exists(dest_dir):
+                        shutil.rmtree(dest_dir)
+                    shutil.copytree(asset_path, dest_dir)
+                else:
+                    # Copy file
+                    shutil.copy2(asset_path, self.build_dir)
+                logger.info(f"Copied asset: {asset_path}")
+            except Exception as e:
+                logger.error(f"Error copying asset {asset_path}: {e}")
+        
+        # Copy favicon files if they exist
+        favicon_files = ['favicon.svg', 'favicon-16x16.png']
+        assets_dir = './assets'
+        if os.path.exists(assets_dir):
+            for favicon in favicon_files:
+                src_path = os.path.join(assets_dir, favicon)
+                if os.path.exists(src_path):
+                    try:
+                        shutil.copy2(src_path, os.path.join(self.build_dir, favicon))
+                        logger.info(f"Copied favicon: {favicon}")
+                    except Exception as e:
+                        logger.error(f"Error copying favicon {favicon}: {e}")
     
     def _generate_blog_pages(self, blog_processor: BlogProcessor):
         """Generate blog pages."""
