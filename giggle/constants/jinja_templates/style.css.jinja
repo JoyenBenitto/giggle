@@ -1,13 +1,13 @@
 /* Modern Tailwind-inspired Dark Theme */
 :root {
     /* Colors */
-    --color-primary: {{ colors.primary | default('#3b82f6') }};
-    --color-background: {{ colors.background | default('#0f172a') }};
-    --color-background-secondary: {{ colors.background_secondary | default('#1e293b') }};
-    --color-text: {{ colors.text | default('#f1f5f9') }};
-    --color-text-secondary: {{ colors.text_secondary | default('#94a3b8') }};
-    --color-accent: {{ colors.accent | default('#60a5fa') }};
-    --color-border: {{ colors.border | default('#94a3b8') }};
+    --color-primary: {{ colors.get('primary', '#3b82f6') }};
+    --color-background: {{ colors.get('background', '#0f172a') }};
+    --color-background-secondary: {{ colors.get('background_secondary', '#1e293b') }};
+    --color-text: {{ colors.get('text', '#f1f5f9') }};
+    --color-text-secondary: {{ colors.get('text_secondary', '#94a3b8') }};
+    --color-accent: {{ colors.get('accent', '#60a5fa') }};
+    --color-border: {{ colors.get('border', '#94a3b8') }};
 }
 
 /* Base Reset */
@@ -22,9 +22,9 @@ html {
 }
 
 body {
-    font-family: {{ typography.font_family.body | default('Inter, system-ui, -apple-system, sans-serif') }};
-    font-size: {{ typography.sizes.body | default('16px') }};
-    line-height: {{ typography.line_height.body | default('1.75') }};
+    font-family: {{ typography.get('font_family', {}).get('body', 'Inter, system-ui, -apple-system, sans-serif') }};
+    font-size: {{ typography.get('sizes', {}).get('body', '16px') }};
+    line-height: {{ typography.get('line_height', {}).get('body', '1.75') }};
     color: var(--color-text);
     background-color: var(--color-background);
     -webkit-font-smoothing: antialiased;
@@ -41,38 +41,38 @@ body {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-    font-family: {{ typography.font_family.headers | default('Inter, system-ui, -apple-system, sans-serif') }};
-    line-height: {{ typography.line_height.headers | default('1.25') }};
+    font-family: {{ typography.get('font_family', {}).get('headers', 'Inter, system-ui, -apple-system, sans-serif') }};
+    line-height: {{ typography.get('line_height', {}).get('headers', '1.25') }};
     font-weight: 600;
     color: var(--color-text);
     margin-bottom: 1.5rem;
 }
 
 h1 { 
-    font-size: {{ typography.sizes.headers.h1 | default('3rem') }};
+    font-size: {{ typography.get('sizes', {}).get('headers', {}).get('h1', '3rem') }};
     letter-spacing: -0.025em;
 }
 
 h2 { 
-    font-size: {{ typography.sizes.headers.h2 | default('2.25rem') }};
+    font-size: {{ typography.get('sizes', {}).get('headers', {}).get('h2', '2.25rem') }};
     letter-spacing: -0.025em;
 }
 
 h3 { 
-    font-size: {{ typography.sizes.headers.h3 | default('1.875rem') }};
+    font-size: {{ typography.get('sizes', {}).get('headers', {}).get('h3', '1.875rem') }};
     letter-spacing: -0.02em;
 }
 
 h4 { 
-    font-size: {{ typography.sizes.headers.h4 | default('1.5rem') }};
+    font-size: {{ typography.get('sizes', {}).get('headers', {}).get('h4', '1.5rem') }};
 }
 
 h5 { 
-    font-size: {{ typography.sizes.headers.h5 | default('1.25rem') }};
+    font-size: {{ typography.get('sizes', {}).get('headers', {}).get('h5', '1.25rem') }};
 }
 
 h6 { 
-    font-size: {{ typography.sizes.headers.h6 | default('1.125rem') }};
+    font-size: {{ typography.get('sizes', {}).get('headers', {}).get('h6', '1.125rem') }};
 }
 
 p {
@@ -84,6 +84,7 @@ p {
 a {
     color: var(--color-primary);
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 a:hover {
@@ -432,9 +433,9 @@ footer {
         padding: 0 1rem;
     }
 
-    h1 { font-size: calc({{ typography.sizes.headers.h1 | default('3rem') }} * 0.8); }
-    h2 { font-size: calc({{ typography.sizes.headers.h2 | default('2.25rem') }} * 0.8); }
-    h3 { font-size: calc({{ typography.sizes.headers.h3 | default('1.875rem') }} * 0.8); }
+    h1 { font-size: calc({{ typography.get('sizes', {}).get('headers', {}).get('h1', '3rem') }} * 0.8); }
+    h2 { font-size: calc({{ typography.get('sizes', {}).get('headers', {}).get('h2', '2.25rem') }} * 0.8); }
+    h3 { font-size: calc({{ typography.get('sizes', {}).get('headers', {}).get('h3', '1.875rem') }} * 0.8); }
 
     .nav-content {
         flex-direction: column;

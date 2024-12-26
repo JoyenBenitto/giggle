@@ -1,0 +1,36 @@
+# Site Configuration
+
+title = "My Blog"
+description = "A personal blog built with Giggle"
+author = "Your Name"
+
+# Directory paths
+[paths]
+blogs = "sample_markdowns/blog"
+pages = "sample_markdowns/pages"
+assets = "assets"
+
+# Navigation
+[[nav]]
+name = "Home"
+url = "/"
+
+[[nav]]
+name = "Blog"
+url = "/blog"
+
+[[nav]]
+name = "Tags"
+url = "/tags"
+
+# Social media links
+[social]
+github = "https://github.com/yourusername"
+twitter = "https://twitter.com/yourusername"
+
+# Site styling
+[style]
+primary_color = "#007bff"
+secondary_color = "#6c757d"
+background_color = "#ffffff"
+text_color = "#212529"

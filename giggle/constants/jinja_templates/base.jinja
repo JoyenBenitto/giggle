@@ -15,7 +15,11 @@
     {{ recipe.fonts | safe }}
     
     <!-- Custom Styles -->
+    {% if css_path %}
+    <link rel="stylesheet" href="{{ css_path }}/style.css">
+    {% else %}
     <link rel="stylesheet" href="./style.css">
+    {% endif %}
     
     <!-- Site Metadata -->
     <title>{{ recipe.site.title | default('My Website') }}</title>

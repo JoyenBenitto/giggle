@@ -6,6 +6,8 @@ import logging
 import sys
 from typing import Dict, List, Optional, Any, Union, Tuple
 from datetime import datetime
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 import yaml
 import markdown
@@ -268,7 +270,8 @@ class BlogProcessor:
         # Render the blog index page directly - it already extends base.jinja
         rendered = self.env.get_template('blog_index.jinja').render(
             posts=self.blogs_metadata,
-            recipe=recipe
+            recipe=recipe,
+            css_path="."  # Blog index is in root directory
         )
         logger.debug("Generated blog index page")
         
@@ -297,7 +300,8 @@ class BlogProcessor:
                     tags=blog['tags'],
                     author=blog.get('author', ''),
                     description=blog['description'],
-                    recipe=recipe
+                    recipe=recipe,
+                    css_path=".."  # Blog posts are one level deep
                 )
                 blog_pages.append((blog['url'], rendered_content))
                 logger.debug(f"Generated page for {blog['url']}")
@@ -359,64 +363,64 @@ class TagProcessor:
         Args:
             build_dir (str): Build directory path
         """
-        logger.info(f"Generating tag pages. Found tags: {list(self.tag_db.keys())}")
+        logger.info("Generating tag pages")
         
-        try:
-            # Create tags directory
-            tags_dir = os.path.join(build_dir, 'tags')
-            os.makedirs(tags_dir, exist_ok=True)
-            
-            # Get templates
-            tag_template = self.env.get_template('tag_page.jinja')
-            tags_index_template = self.env.get_template('tags_index.jinja')
-            
-            # Generate individual tag pages
-            for tag, pages in self.tag_db.items():
-                try:
-                    logger.debug(f"Generating page for tag '{tag}' with {len(pages)} pages")
-                    rendered_page = tag_template.render(
-                        tag=tag,
-                        pages=pages,
-                        recipe=self.recipe
-                    )
-                    
-                    output_path = os.path.join(tags_dir, f"{tag}.html")
-                    with open(output_path, 'w', encoding='utf-8') as f:
-                        f.write(rendered_page)
-                    logger.info(f"Generated tag page: {tag}.html")
-                        
-                except Exception as e:
-                    logger.error(f"Error generating tag page for {tag}: {e}")
-            
-            # Generate tags index
+        # Create tags directory
+        tags_dir = os.path.join(build_dir, 'tags')
+        os.makedirs(tags_dir, exist_ok=True)
+        
+        # Prepare tag data for index page
+        tag_counts = {tag: len(pages) for tag, pages in self.tag_db.items()}
+        recipe_with_tags = dict(self.recipe)
+        recipe_with_tags['tags'] = sorted(self.tag_db.keys())
+        recipe_with_tags['tag_counts'] = tag_counts
+        
+        # Generate individual tag pages
+        for tag, pages in self.tag_db.items():
             try:
-                logger.debug(f"Generating tags index with tags: {list(self.tag_db.keys())}")
-                rendered_index = tags_index_template.render(
-                    tags=sorted(self.tag_db.keys()),
-                    tag_counts={tag: len(pages) for tag, pages in self.tag_db.items()},
-                    recipe=self.recipe
+                logger.debug(f"Generating page for tag: {tag}")
+                rendered = self.env.get_template('tag_page.jinja').render(
+                    tag=tag,
+                    pages=sorted(pages, key=lambda x: x.get('date', ''), reverse=True),
+                    recipe=recipe_with_tags,
+                    css_path=".."  # Tag pages are one level deep
                 )
                 
-                index_path = os.path.join(build_dir, 'tags.html')
-                with open(index_path, 'w', encoding='utf-8') as f:
-                    f.write(rendered_index)
-                logger.info("Generated tags index page")
-                    
+                # Write tag page
+                tag_file = os.path.join(tags_dir, f"{tag}.html")
+                with open(tag_file, 'w', encoding='utf-8') as f:
+                    f.write(rendered)
+                logger.debug(f"Generated tag page: {tag_file}")
             except Exception as e:
-                logger.error(f"Error generating tags index: {e}")
-                
+                logger.error(f"Error generating page for tag {tag}: {e}")
+        
+        # Generate tags index
+        try:
+            logger.info("Generating tags index page")
+            rendered = self.env.get_template('tags_index.jinja').render(
+                recipe=recipe_with_tags,
+                css_path="."  # Tags index is in root directory
+            )
+            
+            # Write tags index
+            index_file = os.path.join(build_dir, 'tags.html')
+            with open(index_file, 'w', encoding='utf-8') as f:
+                f.write(rendered)
+            logger.debug("Generated tags index page")
         except Exception as e:
-            logger.error(f"Error during tag page generation: {e}")
+            logger.error(f"Error generating tags index: {e}")
 
 class StaticSiteGenerator:
     """Modern static site generator with enhanced configuration handling."""
     
     def __init__(
-            self, 
-            site_config: Union[str, List[str]], 
-            style_config: Optional[Union[str, List[str]]] = None, 
-            build_dir: Optional[str] = None
-        ):
+                self, 
+                site_config: Union[str, List[str]], 
+                style_config: Optional[Union[str, List[str]]] = None, 
+                build_dir: Optional[str] = None,
+                production_mode: bool = False,
+                site_url: Optional[str] = None
+            ):
         """
         Initialize static site generator with flexible configuration.
         
@@ -424,6 +428,8 @@ class StaticSiteGenerator:
             site_config (Union[str, List[str]]): Path to site configuration file(s)
             style_config (Optional[Union[str, List[str]]]): Path to style configuration file(s)
             build_dir (Optional[str]): Output directory for generated site
+            production_mode (bool): Whether to enable production optimizations
+            site_url (Optional[str]): Base URL of the site (required for production mode)
         """
         # Resolve and load configuration files
         site_config_paths = ConfigurationLoader.resolve_config_paths(site_config)
@@ -468,7 +474,14 @@ class StaticSiteGenerator:
             ),
             autoescape=select_autoescape()
         )
-    
+        
+        # Store production settings
+        self.production_mode = production_mode
+        self.site_url = site_url
+
+        if production_mode and not site_url:
+            raise ValueError("site_url is required when production_mode is enabled")
+
     def _resolve_path(self, path: str) -> str:
         """
         Resolve a path relative to the config file directory.
@@ -606,70 +619,60 @@ class StaticSiteGenerator:
     
     def generate(self):
         """Generate the static site."""
-        try:
-            logger.info("Starting site generation")
-            logger.debug(f"Recipe structure: {self.recipe}")
-            
-            # Create build directory if it doesn't exist
-            os.makedirs(self.build_dir, exist_ok=True)
-            logger.info(f"Created build directory: {self.build_dir}")
-            
-            # Initialize processors
-            if self.blogs_path:
-                logger.info(f"Blog path configured: {self.blogs_path}")
-                blog_processor = BlogProcessor(self.blogs_path, self.env)
-            else:
-                logger.info("No blog path configured")
-                blog_processor = None
+        log_section("Generating Static Site")
+        
+        # Initialize processors
+        if self.blogs_path:
+            logger.info(f"Blog path configured: {self.blogs_path}")
+            blog_processor = BlogProcessor(self.blogs_path, self.env)
+        else:
+            logger.info("No blog path configured")
+            blog_processor = None
                 
-            tag_processor = TagProcessor(self.recipe, self.env)
+        tag_processor = TagProcessor(self.recipe, self.env)
+        
+        # Generate blog pages if configured
+        if blog_processor:
+            logger.info("Generating blog pages")
+            self._generate_blog_pages(blog_processor)
             
-            # Generate pages
-            logger.info("Generating regular pages")
-            self._generate_pages(tag_processor)
+            # Process blog tags
+            logger.info("Processing blog tags")
+            for blog in blog_processor.blogs_metadata:
+                if blog.get('tags'):
+                    logger.debug(f"Processing tags for blog: {blog['title']}")
+                    tag_processor.process_tags(
+                        os.path.join(self.blogs_path, blog['url'].replace('blogs/', '').replace('.html', '.md')),
+                        {
+                            'title': blog['title'],
+                            'description': blog.get('description', ''),
+                            'tags': blog.get('tags', []),
+                            'date': blog['date'],
+                            'url': blog['url']
+                        }
+                    )
             
-            # Generate blog pages if configured
-            if blog_processor:
-                logger.info("Generating blog pages")
-                self._generate_blog_pages(blog_processor)
-                
-                # Process blog tags
-                logger.info("Processing blog tags")
-                for blog in blog_processor.blogs_metadata:
-                    if blog.get('tags'):
-                        logger.debug(f"Processing tags for blog: {blog['title']}")
-                        tag_processor.process_tags(
-                            os.path.join(self.blogs_path, blog['url'].replace('blogs/', '').replace('.html', '.md')),
-                            {
-                                'title': blog['title'],
-                                'description': blog.get('description', ''),
-                                'tags': blog.get('tags', []),
-                                'date': blog['date'],
-                                'url': blog['url']
-                            }
-                        )
-            
-            # Process tags if enabled
-            if self.recipe.get('features', {}).get('tag_pages', False):
-                logger.info("Tag pages enabled, generating tag pages")
-                tag_processor.generate_tag_pages(self.build_dir)
-            else:
-                logger.info("Tag pages disabled, skipping tag generation")
-            
-            # Generate CSS
-            logger.info("Generating CSS")
-            self._generate_css()
-            
-            # Copy assets
-            logger.info("Copying assets")
-            self._copy_assets()
-            
-            logger.info(f"Site generation complete in {self.build_dir}")
-            
-        except Exception as e:
-            logger.error(f"Error during site generation: {e}")
-            raise
-            
+            # Generate tag pages after processing all blog tags
+            logger.info("Generating tag pages")
+            tag_processor.generate_tag_pages(self.build_dir)
+        
+        # Generate regular pages
+        logger.info("Generating regular pages")
+        self._generate_pages(tag_processor)
+        
+        # Generate CSS
+        logger.info("Generating CSS")
+        self._generate_css()
+        
+        # Copy assets
+        logger.info("Copying assets")
+        self._copy_assets()
+        
+        # Apply production optimizations if in production mode
+        self._apply_production_optimizations()
+        
+        logger.info("Site generation completed successfully!")
+
     def _generate_blog_pages(self, blog_processor: BlogProcessor):
         """Generate blog pages."""
         logger.info("Generating blog pages")
@@ -774,16 +777,72 @@ class StaticSiteGenerator:
         )
         css_template = env.get_template("style.css.jinja")
         
-        # Extract style-related configuration
-        style_context = {
-            'colors': self.style_config.get('colors', {}),
-            'typography': self.style_config.get('typography', {}),
-            'styles': self.style_config.get('styles', {}),
-            'components': self.style_config.get('components', {}),
-            'table': self.style_config.get('table', {}),
-            'image': self.style_config.get('image', {})
+        # Create default typography configuration
+        default_typography = {
+            'font_family': {
+                'body': 'Inter, system-ui, -apple-system, sans-serif',
+                'headers': 'Inter, system-ui, -apple-system, sans-serif'
+            },
+            'sizes': {
+                'body': '16px',
+                'headers': {
+                    'h1': '3rem',
+                    'h2': '2.25rem',
+                    'h3': '1.875rem',
+                    'h4': '1.5rem',
+                    'h5': '1.25rem',
+                    'h6': '1.125rem'
+                }
+            },
+            'line_height': {
+                'body': '1.75',
+                'headers': '1.25'
+            }
         }
+
+        # Get user typography config or empty dict if none
+        user_typography = self.style_config.get('typography', {}) or {}
         
+        # Merge user typography with defaults, ensuring nested structure
+        typography_config = {
+            'font_family': {
+                'body': user_typography.get('font_family', {}).get('body', default_typography['font_family']['body']) 
+                        if isinstance(user_typography.get('font_family', {}), dict) 
+                        else default_typography['font_family']['body'],
+                'headers': user_typography.get('font_family', {}).get('headers', default_typography['font_family']['headers'])
+                        if isinstance(user_typography.get('font_family', {}), dict)
+                        else default_typography['font_family']['headers']
+            },
+            'sizes': {
+                'body': user_typography.get('sizes', {}).get('body', default_typography['sizes']['body'])
+                        if isinstance(user_typography.get('sizes', {}), dict)
+                        else default_typography['sizes']['body'],
+                'headers': default_typography['sizes']['headers'].copy()
+            },
+            'line_height': {
+                'body': user_typography.get('line_height', {}).get('body', default_typography['line_height']['body'])
+                        if isinstance(user_typography.get('line_height', {}), dict)
+                        else default_typography['line_height']['body'],
+                'headers': user_typography.get('line_height', {}).get('headers', default_typography['line_height']['headers'])
+                        if isinstance(user_typography.get('line_height', {}), dict)
+                        else default_typography['line_height']['headers']
+            }
+        }
+
+        # Safely update header sizes if provided
+        user_headers = user_typography.get('sizes', {}).get('headers', {})
+        if isinstance(user_headers, dict):
+            typography_config['sizes']['headers'].update(user_headers)
+
+        style_context = {
+            'colors': self.style_config.get('colors', {}) or {},
+            'typography': typography_config,
+            'styles': self.style_config.get('styles', {}) or {},
+            'components': self.style_config.get('components', {}) or {},
+            'table': self.style_config.get('table', {}) or {},
+            'image': self.style_config.get('image', {}) or {}
+        }
+
         try:
             rendered_css = css_template.render(**style_context)
             
@@ -795,13 +854,45 @@ class StaticSiteGenerator:
             logger.error(f"Error generating CSS: {e}")
             # Create a minimal fallback CSS if template rendering fails
             fallback_css = """
-            body { background-color: #121212; color: #E0E0E0; }
-            a { color: #2196F3; }
+            :root {
+                --color-primary: #3b82f6;
+                --color-background: #0f172a;
+                --color-text: #f1f5f9;
+                --color-text-secondary: #94a3b8;
+            }
+            
+            body {
+                font-family: Inter, system-ui, -apple-system, sans-serif;
+                font-size: 16px;
+                line-height: 1.75;
+                color: var(--color-text);
+                background-color: var(--color-background);
+                margin: 0;
+                padding: 20px;
+            }
+            
+            a {
+                color: var(--color-primary);
+                text-decoration: none;
+            }
+            
+            h1, h2, h3, h4, h5, h6 {
+                color: var(--color-text);
+                line-height: 1.25;
+                margin-bottom: 1rem;
+            }
+
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2.25rem; }
+            h3 { font-size: 1.875rem; }
+            h4 { font-size: 1.5rem; }
+            h5 { font-size: 1.25rem; }
+            h6 { font-size: 1.125rem; }
             """
             with open(os.path.join(self.build_dir, "style.css"), "w", encoding='utf-8') as f:
                 f.write(fallback_css)
             logger.info("Generated fallback style.css due to error")
-    
+
     def _copy_assets(self):
         """Copy JavaScript and other static assets to build directory."""
         import shutil
@@ -857,6 +948,81 @@ class StaticSiteGenerator:
                         logger.info(f"Copied favicon: {favicon}")
                     except Exception as e:
                         logger.error(f"Error copying favicon {favicon}: {e}")
+
+    def _remove_html_extensions(self):
+        """Remove .html extensions from internal links in all HTML files"""
+        logger.info("Removing .html extensions from internal links...")
+        
+        for root, dirs, files in os.walk(self.build_dir):
+            for file in files:
+                if file.endswith('.html'):
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Replace internal .html links
+                    content = content.replace('href=".html"', 'href="/"')
+                    content = content.replace('href="index.html"', 'href="/"')
+                    content = content.replace('.html"', '"')
+                    
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+
+    def _generate_sitemap(self):
+        """Generate sitemap.xml for search engines"""
+        logger.info("Generating sitemap.xml...")
+        
+        urlset = ET.Element('urlset', xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+        
+        # Walk through the build directory
+        for root, dirs, files in os.walk(self.build_dir):
+            for file in files:
+                if file.endswith('.html'):
+                    # Create URL entry
+                    url = ET.SubElement(urlset, 'url')
+                    
+                    # Get relative path and remove .html extension
+                    rel_path = os.path.relpath(os.path.join(root, file), self.build_dir)
+                    if rel_path == 'index.html':
+                        rel_path = ''
+                    else:
+                        rel_path = rel_path.replace('.html', '')
+                    
+                    # Add URL elements
+                    loc = ET.SubElement(url, 'loc')
+                    loc.text = f"{self.site_url.rstrip('/')}/{rel_path}"
+                    
+                    lastmod = ET.SubElement(url, 'lastmod')
+                    lastmod.text = datetime.now().strftime('%Y-%m-%d')
+                    
+                    changefreq = ET.SubElement(url, 'changefreq')
+                    changefreq.text = 'weekly'
+                    
+                    priority = ET.SubElement(url, 'priority')
+                    priority.text = '0.8'
+        
+        # Create the sitemap file
+        xmlstr = minidom.parseString(ET.tostring(urlset)).toprettyxml(indent="   ")
+        with open(os.path.join(self.build_dir, 'sitemap.xml'), 'w', encoding='utf-8') as f:
+            f.write(xmlstr)
+
+    def _apply_production_optimizations(self):
+        """Apply all production-specific optimizations"""
+        if not self.production_mode:
+            return
+            
+        logger.info("Applying production optimizations...")
+        self._remove_html_extensions()
+        self._generate_sitemap()
+        
+        # Copy vercel.json for deployment
+        vercel_template = os.path.join(os.path.dirname(__file__), "constants/vercel.json")
+        if os.path.exists(vercel_template):
+            logger.info("Copying vercel.json for deployment...")
+            import shutil
+            shutil.copy2(vercel_template, os.path.join(self.build_dir, "vercel.json"))
+        else:
+            logger.warning("vercel.json template not found in constants directory")
 
 class ssg(StaticSiteGenerator):
     """

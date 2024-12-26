@@ -8,6 +8,9 @@ from giggle import ssg
 from giggle import utils
 from giggle.__init__ import __version__
 from ruamel.yaml import YAML
+from datetime import datetime
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -146,6 +149,59 @@ def directory_setup(build, config):
     config_src = load_yaml(config)
     mover(build, config_src)
 
+def generate_sitemap(build_dir, site_url):
+    """Generate sitemap.xml for search engines"""
+    urlset = ET.Element('urlset', xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    
+    # Walk through the build directory
+    for root, dirs, files in os.walk(build_dir):
+        for file in files:
+            if file.endswith('.html'):
+                # Create URL entry
+                url = ET.SubElement(urlset, 'url')
+                
+                # Get relative path and remove .html extension
+                rel_path = os.path.relpath(os.path.join(root, file), build_dir)
+                if rel_path == 'index.html':
+                    rel_path = ''
+                else:
+                    rel_path = rel_path.replace('.html', '')
+                
+                # Add URL elements
+                loc = ET.SubElement(url, 'loc')
+                loc.text = f"{site_url.rstrip('/')}/{rel_path}"
+                
+                lastmod = ET.SubElement(url, 'lastmod')
+                lastmod.text = datetime.now().strftime('%Y-%m-%d')
+                
+                changefreq = ET.SubElement(url, 'changefreq')
+                changefreq.text = 'weekly'
+                
+                priority = ET.SubElement(url, 'priority')
+                priority.text = '0.8'
+    
+    # Create the sitemap file
+    xmlstr = minidom.parseString(ET.tostring(urlset)).toprettyxml(indent="   ")
+    with open(os.path.join(build_dir, 'sitemap.xml'), 'w', encoding='utf-8') as f:
+        f.write(xmlstr)
+
+def remove_html_extensions(build_dir):
+    """Remove .html extensions from internal links"""
+    for root, dirs, files in os.walk(build_dir):
+        for file in files:
+            if file.endswith('.html'):
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Replace internal .html links
+                content = content.replace('href=".html"', 'href="/"')
+                content = content.replace('href="index.html"', 'href="/"')
+                content = content.replace('.html"', '"')
+                
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
 # Top level group
 @click.group()
 @click.version_option(version=__version__)
@@ -197,6 +253,61 @@ def cook(site_config, style_config, build_dir, verbose):
     
     # Generate the site
     ssg_inst.generate()
+
+@click.argument('site_config', type=click.Path(exists=True))
+@click.option(
+    '--style-config',
+    help='Path to the style configuration YAML',
+    required=False
+)
+@click.option(
+    '--verbose',
+    '-v',
+    default='info',
+    show_default=True,
+    help='Set verbose level for the console logs',
+    type=click.Choice(['info', 'error', 'debug'])
+)
+@click.option(
+    '--build-dir',
+    '-bd',
+    help='This argument sets the directory where the output files are stored',
+    default='./build',
+    show_default=True,
+    required=False
+)
+@click.option(
+    '--site-url',
+    help='Base URL of your website (required for sitemap generation)',
+    required=True
+)
+@cli.command()
+def cook_production(site_config, style_config, build_dir, verbose, site_url):
+    """Generates a production-ready website with SEO optimizations"""
+    
+    logging.root.setLevel(verbose.upper())
+    logger = logging.getLogger()
+    logger.handlers = []
+    ch = logging.StreamHandler()
+    ch.setFormatter(utils.ColoredFormatter())
+    logger.addHandler(ch)
+
+    logger.info('************ Giggle Static Site Generator (Production Mode) ************ ')
+    logger.info('\n\n')
+
+    # Create the static site generator with production mode enabled
+    ssg_inst = ssg.StaticSiteGenerator(
+        site_config=site_config, 
+        style_config=style_config, 
+        build_dir=build_dir,
+        production_mode=True,
+        site_url=site_url
+    )
+    
+    # Generate the site (production optimizations will be applied automatically)
+    ssg_inst.generate()
+    
+    logger.info('Production build completed successfully!')
 
 if __name__ == '__main__':
     cli()
