@@ -13,8 +13,10 @@ def read_requires():
         'Jinja2>=3.0.0',
         'PyYAML>=6.0.0',
         'markdown>=3.4.0',
-        'ruamel.yaml>=0.17.0',
-        'python-frontmatter>=1.0.0'
+        'python-frontmatter>=1.0.0',
+        'livereload>=2.6.0',
+        'watchdog>=2.1.0',
+        'pygments>=2.13.0'
     ]
     return requirements
 
@@ -23,7 +25,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='giggle',
-    version='0.1.0',
+    version='0.2.0',
     description="A modern static site generator with enhanced configuration management",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -45,9 +47,12 @@ setup(
     packages=find_packages(include=['giggle', 'giggle.*']),
     package_data={
         'giggle': [
-            'constants/jinja_templates/*.jinja',
-            'constants/css/*.css',
-            'constants/js/*.js'
+            'themes/modern/templates/*.html',
+            'themes/modern/assets/css/*.css',
+            'themes/modern/assets/js/*.js',
+            'themes/basic/templates/*.html',
+            'themes/basic/assets/css/*.css',
+            'themes/basic/assets/js/*.js'
         ]
     },
     install_requires=read_requires(),

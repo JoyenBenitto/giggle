@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="project">
+    <header class="project-header">
+        <h1 class="project-title">{{ page.title }}</h1>
+        
+        {% if page.description %}
+        <div class="project-description">
+            {{ page.description }}
+        </div>
+        {% endif %}
+        
+        <div class="project-links">
+            {% if page.github %}
+            <a href="{{ page.github }}" class="project-link github" target="_blank" rel="noopener">
+                <span class="link-icon github-icon"></span>
+                <span class="link-text">GitHub</span>
+            </a>
+            {% endif %}
+            
+            {% if page.demo %}
+            <a href="{{ page.demo }}" class="project-link demo" target="_blank" rel="noopener">
+                <span class="link-icon demo-icon"></span>
+                <span class="link-text">Live Demo</span>
+            </a>
+            {% endif %}
+            
+            {% if page.documentation %}
+            <a href="{{ page.documentation }}" class="project-link docs" target="_blank" rel="noopener">
+                <span class="link-icon docs-icon"></span>
+                <span class="link-text">Documentation</span>
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if page.tags %}
+        <div class="project-tags">
+            {% for tag in page.tags %}
+            <a href="/tags/{{ tag|slugify }}/" class="project-tag">{{ tag }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    {% if page.featured_image %}
+    <div class="project-featured-image">
+        <img src="{{ page.featured_image }}" alt="{{ page.title }}">
+    </div>
+    {% endif %}
+
+    <div class="project-content">
+        {{ content|safe }}
+    </div>
+    
+    {% if page.gallery %}
+    <div class="project-gallery">
+        <h2 class="gallery-title">Project Gallery</h2>
+        <div class="gallery-grid">
+            {% for image in page.gallery %}
+            <div class="gallery-item">
+                <img src="{{ image.src }}" alt="{{ image.alt|default(page.title) }}" class="gallery-image">
+                {% if image.caption %}
+                <div class="gallery-caption">{{ image.caption }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if page.technologies %}
+    <div class="project-technologies">
+        <h2 class="technologies-title">Technologies Used</h2>
+        <ul class="technologies-list">
+            {% for tech in page.technologies %}
+            <li class="technology-item">{{ tech }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</article>
+
+{% if related_projects %}
+<section class="related-projects">
+    <h2 class="related-title">Related Projects</h2>
+    <div class="projects-grid">
+        {% for project in related_projects|limit(3) %}
+        <div class="project-card">
+            {% if project.featured_image %}
+            <div class="project-card-image">
+                <a href="{{ project.url }}">
+                    <img src="{{ project.featured_image }}" alt="{{ project.title }}">
+                </a>
+            </div>
+            {% endif %}
+            <div class="project-card-content">
+                <h3 class="project-card-title">
+                    <a href="{{ project.url }}">{{ project.title }}</a>
+                </h3>
+                {% if project.description %}
+                <div class="project-card-description">{{ project.description }}</div>
+                {% endif %}
+                {% if project.tags %}
+                <div class="project-card-tags">
+                    {% for tag in project.tags|limit(3) %}
+                    <span class="project-card-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,6 +1,6 @@
 # Giggle Static Site Generator
 
-Giggle is a modern, feature-rich static site generator built with Python. Create beautiful, responsive websites with a dark theme and modern design out of the box.
+Giggle is a modern, feature-rich static site generator built with Python. Create beautiful, responsive websites with a dark theme and modern design out of the box. Giggle uses Jinja2 templates, YAML configuration, and Markdown content to generate static websites quickly and efficiently.
 
 ## Features
 
@@ -22,109 +22,139 @@ Giggle is a modern, feature-rich static site generator built with Python. Create
 
 2. Create a new site:
    ```bash
-   mkdir my-site
+   giggle new my-site
    cd my-site
-   giggle init
    ```
 
-3. Build your site:
+3. Create new content:
    ```bash
-   giggle cook --site-config config_srcs/site_config.yaml --style-config config_srcs/style_config.yaml
+   giggle new_content post "My First Post"
+   giggle new_content page "About"
+   giggle new_content project "My Project"
    ```
 
-4. Serve your site locally:
+4. Build your site:
    ```bash
-   cd build
-   python -m http.server 8000
+   giggle build
+   ```
+
+5. Serve your site locally with live reload:
+   ```bash
+   giggle serve
    ```
 
 Visit `http://localhost:8000` to see your site!
 
 ## Configuration
 
-Giggle uses two main configuration files:
-
-### Site Configuration (`site_config.yaml`)
+Giggle uses a single YAML configuration file (`giggle.yaml`) for site settings:
 
 ```yaml
+# Site information
 site:
   title: "Your Site Title"
-  description: "Site description"
+  description: "Your site description for SEO"
   author: "Your Name"
   url: "https://example.com"
-  copyright: "2024"
-  social_links:
-    GitHub: "https://github.com/username"
-    LinkedIn: "https://linkedin.com/in/username"
+  language: "en"
+  copyright: "© 2025 Your Name"
 
+# Theme configuration
+theme: "modern"  # Options: modern, basic, or custom theme name
+theme_config:
+  # Modern theme specific settings
+  colors:
+    primary: "#3498db"  # Primary brand color
+    secondary: "#2ecc71"  # Secondary color
+    accent: "#e74c3c"  # Accent color for highlights
+  fonts:
+    heading: "'Roboto', sans-serif"
+    body: "'Open Sans', sans-serif"
+  features:
+    dark_mode: true  # Enable dark mode toggle
+    comments: false  # Enable comments section
+    analytics:
+      enabled: false
+      id: ""  # Google Analytics ID
+
+# Navigation menu
 navigation:
   - title: "Home"
-    url: "./index.html"
+    url: "/"
   - title: "Blog"
-    url: "./blogs.html"
+    url: "/blog/"
+  - title: "Projects"
+    url: "/projects/"
+  - title: "About"
+    url: "/about/"
 
-pages:
-  index: ./markdowns/main.md
-  blogs: ./markdowns/blog/
-  about: ./markdowns/about.md
+# Content directories
+content:
+  pages: "content/pages"  # Regular pages
+  posts: "content/posts"  # Blog posts
+  projects: "content/projects"  # Project pages
 
-features:
-  tag_pages: true
-  blog_pages: true
-  dark_mode: true
-  search: true
-```
-
-### Style Configuration (`style_config.yaml`)
-
-```yaml
-colors:
-  background: "#121212"
-  text: "#E0E0E0"
-  primary: "#2196F3"
-  accent: "#64B5F6"
-  background_secondary: "#1E1E1E"
-  text_secondary: "#A0A0A0"
-
-typography:
-  font_family:
-    body: '"Inter", sans-serif'
-    headers: '"Roboto", sans-serif'
-  sizes:
-    body: "16px"
-    headers:
-      h1: "2rem"
-      h2: "1.5rem"
-      h3: "1.3rem"
+# Output settings
+output:
+  dir: "_site"  # Output directory
+  pretty_urls: true  # Use pretty URLs (no .html extension)
+  assets:
+    optimize: true  # Optimize assets during build
 ```
 
 ## Directory Structure
 
+When you create a new Giggle site, it will have the following structure:
+
 ```
 my-site/
-├── config_srcs/
-│   ├── site_config.yaml
-│   ├── style_config.yaml
-│   └── markdowns/
-│       ├── main.md
-│       ├── about.md
-│       └── blog/
-│           └── first-post.md
-└── build/
+├── giggle.yaml            # Main configuration file
+├── content/
+│   ├── pages/            # Regular pages
+│   │   ├── index.md      # Homepage
+│   │   └── about.md      # About page
+│   ├── posts/            # Blog posts
+│   │   └── first-post.md # Sample blog post
+│   └── projects/         # Project pages
+│       └── my-project.md # Sample project
+├── assets/
+│   ├── css/             # Custom CSS files
+│   ├── js/              # Custom JavaScript files
+│   └── images/          # Image files
+└── _site/               # Generated output (after build)
     └── (generated files)
 ```
 
 ## Writing Content
 
+Giggle supports three main content types: pages, posts, and projects. You can create them using the CLI or manually.
+
+### Using the CLI
+
+The easiest way to create new content is with the CLI:
+
+```bash
+# Create a new page
+giggle new_content page "Page Title"
+
+# Create a new blog post
+giggle new_content post "Blog Post Title"
+
+# Create a new project
+giggle new_content project "Project Title"
+```
+
 ### Pages
 
-Create Markdown files in your content directory with frontmatter:
+Pages are for static content like your homepage, about page, etc. Create Markdown files in your `content/pages` directory with frontmatter:
 
 ```markdown
 ---
 title: My Page Title
 description: Page description for SEO
-tags: [tag1, tag2]
+date: 2025-07-11
+draft: false
+layout: page
 ---
 
 # Welcome to My Page
@@ -134,14 +164,19 @@ Content goes here...
 
 ### Blog Posts
 
-Blog posts use the same format with additional metadata:
+Blog posts are for chronological content. They support additional metadata:
 
 ```markdown
 ---
 title: My First Blog Post
 description: A brief description
-date: 2024-01-01
-tags: [blog, first-post]
+date: 2025-07-11
+author: Your Name
+tags: [tutorial, getting-started]
+categories: [development]
+featured_image: /assets/images/featured-post.jpg
+draft: false
+layout: post
 ---
 
 # My First Blog Post
@@ -149,20 +184,109 @@ tags: [blog, first-post]
 Blog content goes here...
 ```
 
-## Advanced Features
+### Projects
+
+Projects are for showcasing your work with additional metadata:
+
+```markdown
+---
+title: My Amazing Project
+description: A brief description of the project
+date: 2025-07-11
+tags: [web, design]
+status: completed  # Options: completed, in-progress, planned
+links:
+  website: https://example.com
+  github: https://github.com/username/repo
+technologies: [Python, JavaScript, HTML/CSS]
+gallery:
+  - /assets/images/project-1.jpg
+  - /assets/images/project-2.jpg
+draft: false
+layout: project
+---
+
+# My Amazing Project
+
+Project description and details go here...
+```
+
+## CLI Commands
+
+Giggle provides several CLI commands to help you manage your site:
+
+```bash
+# Create a new Giggle site
+giggle new [SITE_NAME]
+
+# Build the site
+giggle build
+
+# Serve the site locally with live reload
+giggle serve [--port PORT] [--host HOST]
+
+# Create new content
+giggle new_content [TYPE] [TITLE]
+# Types: page, post, project
+
+# Apply a theme to your site
+giggle theme [THEME_NAME]
+# Available themes: modern, basic
+```
+
+## Themes
+
+Giggle comes with two built-in themes:
+
+1. **Modern** - A clean, responsive theme with dark mode support, optimized for blogs and portfolios
+2. **Basic** - A minimal starter theme that's easy to customize
+
+### Theme Structure
+
+Each theme includes:
+
+```
+theme-name/
+├── templates/       # Jinja2 templates
+│   ├── base.html    # Base template with common elements
+│   ├── page.html    # Template for pages
+│   ├── post.html    # Template for blog posts
+│   ├── project.html # Template for projects
+│   └── taxonomy.html # Template for tag/category pages
+└── assets/
+    ├── css/         # Stylesheets
+    │   ├── main.css # Main stylesheet
+    │   └── syntax.css # Code syntax highlighting
+    └── js/          # JavaScript files
+        ├── main.js  # Main JavaScript file
+        └── dark-mode.js # Dark mode toggle functionality
+```
 
 ### Custom Templates
 
-Giggle uses Jinja2 for templating. You can customize the templates by creating your own in the `templates` directory:
+You can override any theme template by creating a file with the same name in your site's `templates` directory. Giggle uses Jinja2 for templating, which provides powerful features like template inheritance, macros, and filters.
 
-- `base.jinja`: Base template for all pages
-- `blog_index.jinja`: Blog listing page
-- `blog_post.jinja`: Individual blog post template
-- `tag_page.jinja`: Tag listing pages
+## Features
 
-### Asset Management
+### Responsive Design
 
-Place static assets (images, JavaScript, etc.) in the `assets` directory. They will be automatically copied to the build directory.
+All built-in themes are fully responsive and work well on all devices from mobile phones to desktop computers.
+
+### Dark Mode
+
+The Modern theme includes built-in dark mode support with a toggle button and system preference detection.
+
+### Syntax Highlighting
+
+Code blocks in your Markdown content are automatically syntax-highlighted using Pygments.
+
+### Live Reload
+
+The development server includes live reload functionality, so your browser automatically refreshes when you make changes to your content or templates.
+
+### SEO Optimization
+
+Giggle generates SEO-friendly HTML with proper meta tags, sitemap.xml, and clean URLs.
 
 ## Contributing
 
