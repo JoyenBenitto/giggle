@@ -7,7 +7,10 @@ Main entry point for the Giggle CLI.
 
 import os
 import shutil
+import logging
 import click
+from giggle import utils
+from giggle import ssg
 from giggle.cli.commands import cli
 from giggle.__init__ import __version__
 

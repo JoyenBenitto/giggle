@@ -5,10 +5,23 @@ import pathlib
 import logging as logger
 import markdown
 from jinja2 import Environment, FileSystemLoader
-import giggle.template as giggle_template
 from giggle import __version__
 
 here= os.path.abspath(os.path.dirname(__file__))
+
+blog_template="""
+<li> 
+  <a href="./blog/{blog_header}.html"> {blog_title}</a>- <i>{date}</i>
+</li>
+"""
+
+tag_site_template= "\t<li><a href=\"{path_to_page}\">{site_name}</a></li>"
+
+tag_site_head="""
+<ul>
+{tag_list}
+</ul>
+"""
 
 class blog_creater():
     def __init__(self, **kwargs):
@@ -33,7 +46,7 @@ class blog_creater():
             data = pathlib.Path(f"{self.blogs_path}/{blog}").read_text(encoding='utf-8')
             md = markdown.Markdown(extensions = ['meta'])
             md.convert(data)
-            blog_list += giggle_template.blog_template.format(
+            blog_list += blog_template.format(
                 date= md.Meta["date"][0],
                 blog_title= md.Meta["title"][0],
                 tiny_desc=md.Meta["desc"][0],
@@ -102,6 +115,7 @@ class ssg():
 
     def tag_page_generator(self):
         """Generates tag site"""
+        os.makedirs(f"{self.build}/tags", exist_ok=True)
         tag_temp='<h1>Tags</h1>\n <div class="tag_holder">{tags_placeholder}</div>'
         tag_html=""
         tag_db= self.tag_db_creater()
@@ -122,7 +136,7 @@ class ssg():
                     site_name= sites.replace("blog/","")
                 else:
                     site_name= sites
-                list_ele +=  giggle_template.tag_site_template.format(
+                list_ele +=  tag_site_template.format(
                     path_to_page=sites,
                     site_name=site_name.replace("../","").replace(".html",""),
                 ) + "\n"
@@ -130,9 +144,8 @@ class ssg():
             rendered_tag_page= template.render(
                 recipe=self.recipe,
                 back=".",
-                body= giggle_template.tag_site_head.format(
+                body= tag_site_head.format(
                     tag_list=list_ele))
-
             with open(f"{self.build}/tags/{page_name}","w") as file:
                 file.write(rendered_tag_page)
         tag_body=tag_temp.format(tags_placeholder=tag_html)
