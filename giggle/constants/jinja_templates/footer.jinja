@@ -1,3 +1,14 @@
-<footer class="footer"> 
-Site Generated with <a href="https://github.com/JoyenBenitto/giggle"><u>giggle</u></a>
+{# Footer template with dynamic content #}
+
+<footer>
+    <div class="footer-content">
+        <div class="copyright">
+            {{ recipe.site.copyright | default('2024') }} {{ recipe.site.author | default('') }}
+        </div>
+        <div class="footer-links">
+            {% for name, url in recipe.social_links.items() %}
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ name }}</a>
+            {% endfor %}
+        </div>
+    </div>
 </footer>

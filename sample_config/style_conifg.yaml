@@ -1,0 +1,47 @@
+# Giggle Static Site Generator - Styling Configuration
+
+# Color Palette
+colors:
+  primary: "#6bfe42"
+  background: 
+    body: "white"
+    main: "white"
+  text: 
+    body: "white"
+
+# Component Styles
+styles:
+  _links:
+    color: "{colors.primary}"
+  _headers:
+    color: "{colors.primary}"
+  _blockquotes:
+    border_color: "{colors.primary}"
+    color: "{colors.primary}"
+  _tags:
+    color: "{colors.primary}"
+  _navbar:
+    color: "{colors.primary}"
+  _footer:
+    color: "{colors.primary}"
+
+# Typography (optional)
+typography:
+  font_family: 
+    body: "Arial, sans-serif"
+    headers: "Helvetica, sans-serif"
+  sizes:
+    body: "16px"
+    headers:
+      h1: "2rem"
+      h2: "1.5rem"
+      h3: "1.25rem"
+
+# Modular Structure
+components:
+  links: "{styles._links}"
+  headers: "{styles._headers}"
+  blockquotes: "{styles._blockquotes}"
+  tags: "{styles._tags}"
+  navbar: "{styles._navbar}"
+  footer: "{styles._footer}"

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+    
+    <!-- Favicon -->
+    {% if site.favicon %}
+    <link rel="icon" href="{{ site.favicon }}">
+    {% endif %}
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/theme/css/modern.css">
+    {% if site.features.syntax_highlighting %}
+    <link rel="stylesheet" href="/theme/css/syntax.css">
+    {% endif %}
+    
+    <!-- Custom CSS -->
+    {% if site.custom_css %}
+    <link rel="stylesheet" href="{{ site.custom_css }}">
+    {% endif %}
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% if theme.fonts.google_fonts %}
+    <link href="{{ theme.fonts.google_fonts }}" rel="stylesheet">
+    {% endif %}
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="{% if theme.appearance.dark_mode %}dark-mode{% endif %}">
+    <div class="page-container">
+        <header class="site-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="site-branding">
+                        <a href="/" class="site-title">{{ site.title }}</a>
+                        {% if site.tagline %}
+                        <p class="site-tagline">{{ site.tagline }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <nav class="main-navigation">
+                        <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+                            <span class="menu-icon"></span>
+                            <span class="screen-reader-text">Menu</span>
+                        </button>
+                        <ul id="primary-menu" class="menu">
+                            {% for item in navigation.main %}
+                            <li class="menu-item {% if page.url == item.url %}active{% endif %}">
+                                <a href="{{ item.url }}">{{ item.title }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="site-content">
+            <div class="container">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-info">
+                        <p>&copy; {{ current_year }} {{ site.title }}. All rights reserved.</p>
+                        {% if site.footer_text %}
+                        <p>{{ site.footer_text }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if site.social %}
+                    <div class="social-links">
+                        {% for platform, url in site.social.items() %}
+                        <a href="{{ url }}" class="social-link {{ platform }}" target="_blank" rel="noopener">
+                            <span class="screen-reader-text">{{ platform }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/theme/js/modern.js"></script>
+    {% if site.features.dark_mode %}
+    <script src="/theme/js/dark-mode.js"></script>
+    {% endif %}
+    
+    {% block scripts %}{% endblock %}
+    
+    {% if site.features.analytics and site.analytics_id %}
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.analytics_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ site.analytics_id }}');
+    </script>
+    {% endif %}
+</body>
+</html>

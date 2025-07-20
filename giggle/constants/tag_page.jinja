@@ -1,0 +1,15 @@
+{% extends "base.jinja" %}
+
+{% block content %}
+<div class="tag-page">
+    <h1 class="tag-title">Pages tagged with "{{ tag_name }}"</h1>
+    
+    <div class="tag-page-links">
+        {% for page in page_links %}
+        <div class="tag-page-link">
+            <a href="{{ page.path }}">{{ page.name }}</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

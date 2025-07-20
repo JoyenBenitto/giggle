@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="taxonomy-archive">
+    <header class="taxonomy-header">
+        <h1 class="taxonomy-title">{{ taxonomy_type|title }}: {{ term }}</h1>
+    </header>
+
+    <div class="taxonomy-content">
+        {% if items %}
+        <div class="items-grid">
+            {% for item in items %}
+            <article class="item-card">
+                <header class="item-header">
+                    <h2 class="item-title">
+                        <a href="{{ item.url }}">{{ item.title }}</a>
+                    </h2>
+                    
+                    {% if item.date %}
+                    <time class="item-date" datetime="{{ item.date }}">
+                        {{ item.date|date_format("%B %d, %Y") }}
+                    </time>
+                    {% endif %}
+                </header>
+                
+                {% if item.featured_image %}
+                <div class="item-image">
+                    <a href="{{ item.url }}">
+                        <img src="{{ item.featured_image }}" alt="{{ item.title }}">
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if item.description or item.excerpt %}
+                <div class="item-excerpt">
+                    {{ item.description or item.excerpt }}
+                </div>
+                {% endif %}
+                
+                <footer class="item-footer">
+                    <a href="{{ item.url }}" class="read-more">Read more</a>
+                    
+                    {% if item.tags %}
+                    <div class="item-tags">
+                        {% for tag in item.tags|limit(3) %}
+                        <a href="/tags/{{ tag|slugify }}/" class="item-tag">{{ tag }}</a>
+                        {% endfor %}
+                        
+                        {% if item.tags|length > 3 %}
+                        <span class="more-tags">+{{ item.tags|length - 3 }}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </footer>
+            </article>
+            {% endfor %}
+        </div>
+        
+        {% if pagination %}
+        <nav class="pagination">
+            {% if pagination.prev_page %}
+            <a href="{{ pagination.prev_page }}" class="pagination-prev">Previous</a>
+            {% endif %}
+            
+            <span class="pagination-current">Page {{ pagination.current_page }} of {{ pagination.total_pages }}</span>
+            
+            {% if pagination.next_page %}
+            <a href="{{ pagination.next_page }}" class="pagination-next">Next</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="no-items">
+            <p>No items found for {{ taxonomy_type }} "{{ term }}".</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

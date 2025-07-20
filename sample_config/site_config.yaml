@@ -1,0 +1,84 @@
+# Site Configuration
+site:
+  title: "My Personal Website"
+  description: "A showcase of my work and thoughts"
+  author: "Your Name"
+  url: "https://example.com"
+  copyright: "2024"
+
+# Social Links
+social_links:
+  GitHub: "https://github.com/yourusername"
+  LinkedIn: "https://linkedin.com/in/yourusername"
+  Twitter: "https://twitter.com/yourusername"
+
+# Fonts Configuration
+fonts: |-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+# Navigation Configuration
+navigation:
+  - name: "Home"
+    path: sample_markdowns/main.md
+    link: "/"
+    page: index
+  - name: "Blog"
+    path: sample_markdowns/blog/
+    link: "/blog/"
+    page: blog
+    enabled: true
+  - name: "Projects"
+    path: sample_markdowns/projects.md
+    link: "/projects/"
+    page: projects
+  - name: "About"
+    path: sample_markdowns/about.md
+    link: "/about/"
+    page: about
+
+# Content Pages
+pages:
+  index: sample_markdowns/main.md
+  blog: sample_markdowns/blog/
+  projects: sample_markdowns/projects.md
+  about: sample_markdowns/about.md
+
+# Feature Toggles
+features:
+  tag_pages: true
+  blog_pages: true
+  dark_mode: true
+  search: true
+
+# Assets to Move
+mover:
+  - sample_markdowns/images
+  - sample_markdowns/assets
+
+# Component Configuration
+components:
+  main:
+    font_family: "Inter, sans-serif"
+    color: "#333333"
+    bg_color: "#ffffff"
+  links:
+    color: "#0066cc"
+    hover_color: "#003366"
+  headers:
+    font_family: "Inter, sans-serif"
+    color: "#222222"
+  blockquotes:
+    font_style: "italic"
+    color: "#666666"
+  tags:
+    bg_color: "#f0f0f0"
+    color: "#333333"
+  navbar:
+    bg_color: "#333333"
+    color: "#ffffff"
+  footer:
+    bg_color: "#f8f8f8"
+    color: "#666666"

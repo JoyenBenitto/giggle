@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="post">
+    <header class="post-header">
+        <h1 class="post-title">{{ page.title }}</h1>
+        
+        <div class="post-meta">
+            {% if page.date %}
+            <time class="post-date" datetime="{{ page.date }}">
+                {{ page.date|date_format("%B %d, %Y") }}
+            </time>
+            {% endif %}
+            
+            {% if page.author %}
+            <span class="post-author">
+                by {{ page.author }}
+            </span>
+            {% endif %}
+        </div>
+        
+        {% if page.categories or page.tags %}
+        <div class="post-taxonomy">
+            {% if page.categories %}
+            <div class="post-categories">
+                <span class="taxonomy-label">Categories:</span>
+                {% for category in page.categories %}
+                <a href="/categories/{{ category|slugify }}/" class="post-category">{{ category }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if page.tags %}
+            <div class="post-tags">
+                <span class="taxonomy-label">Tags:</span>
+                {% for tag in page.tags %}
+                <a href="/tags/{{ tag|slugify }}/" class="post-tag">{{ tag }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </header>
+
+    {% if page.featured_image %}
+    <div class="post-featured-image">
+        <img src="{{ page.featured_image }}" alt="{{ page.title }}">
+    </div>
+    {% endif %}
+
+    <div class="post-content">
+        {{ content|safe }}
+    </div>
+    
+    <footer class="post-footer">
+        {% if site.features.share_buttons %}
+        <div class="share-buttons">
+            <span class="share-label">Share:</span>
+            <a href="https://twitter.com/intent/tweet?url={{ site.url }}{{ page.url }}&text={{ page.title }}" target="_blank" rel="noopener" class="share-button twitter">Twitter</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ site.url }}{{ page.url }}" target="_blank" rel="noopener" class="share-button facebook">Facebook</a>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ site.url }}{{ page.url }}&title={{ page.title }}" target="_blank" rel="noopener" class="share-button linkedin">LinkedIn</a>
+        </div>
+        {% endif %}
+        
+        {% if site.features.related_posts and related_posts %}
+        <div class="related-posts">
+            <h3 class="related-posts-title">Related Posts</h3>
+            <ul class="related-posts-list">
+                {% for related in related_posts|limit(3) %}
+                <li class="related-post-item">
+                    <a href="{{ related.url }}" class="related-post-link">{{ related.title }}</a>
+                    {% if related.date %}
+                    <span class="related-post-date">{{ related.date|date_format("%B %d, %Y") }}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </footer>
+</article>
+
+{% if site.features.comments %}
+<section class="comments-section">
+    <h2 class="comments-title">Comments</h2>
+    <div id="comments" class="comments-area">
+        <!-- Comments will be loaded here by JavaScript -->
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if site.features.comments %}
+<!-- Comments script -->
+<script src="/theme/js/comments.js"></script>
+{% endif %}
+{% endblock %}

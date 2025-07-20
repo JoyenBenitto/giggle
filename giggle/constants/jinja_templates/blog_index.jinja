@@ -1,0 +1,336 @@
+{% extends "base.jinja" %}
+
+{% block title %}Blog - {{ recipe.site.title }}{% endblock %}
+
+{% block content %}
+<div class="blog-index">
+    <header class="blog-header">
+        <h1>Blog Posts</h1>
+        <p>Latest thoughts and updates</p>
+        
+        <div class="blog-filters">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search posts..." class="search-input">
+            </div>
+            
+            <div class="tag-filters">
+                {% set all_tags = [] %}
+                {% for post in posts %}
+                    {% if post.tags %}
+                        {% for tag in post.tags %}
+                            {% if tag not in all_tags %}
+                                {% set _ = all_tags.append(tag) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                
+                <select id="tagFilter" class="tag-select">
+                    <option value="">All Tags</option>
+                    {% for tag in all_tags|sort %}
+                    <option value="{{ tag }}">{{ tag }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <div class="posts-grid" id="postsContainer">
+        {% for post in posts %}
+        <article class="post-card" data-tags="{{ post.tags|join(',') if post.tags else '' }}">
+            <div class="post-content">
+                <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+                {% if post.date %}
+                <div class="post-date">{{ post.date }}</div>
+                {% endif %}
+                {% if post.description %}
+                <p class="post-description">{{ post.description }}</p>
+                {% endif %}
+            </div>
+            {% if post.tags %}
+            <div class="post-tags">
+                {% for tag in post.tags %}
+                <a href="tags/{{ tag }}.html" class="tag">{{ tag }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="no-results" style="display: none;">
+        <p>No posts found matching your search criteria.</p>
+    </div>
+</div>
+
+<style>
+    .blog-index {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .blog-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .blog-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        color: var(--header-color);
+    }
+
+    .blog-header p {
+        margin: 0.5rem 0 0;
+        color: var(--text-muted);
+    }
+
+    /* Search and Filter Styles */
+    .blog-filters {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-container {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--tag-bg);
+        background: var(--card-bg);
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--tag-bg-hover);
+        box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.2);
+    }
+
+    .tag-filters {
+        position: relative;
+        min-width: 200px;
+    }
+
+    .tag-select {
+        width: 100%;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--tag-bg);
+        background: var(--card-bg);
+        color: var(--text-color);
+        font-size: 1rem;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em 1.5em;
+        transition: all 0.2s ease;
+    }
+
+    .tag-select:focus {
+        outline: none;
+        border-color: var(--tag-bg-hover);
+        box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.2);
+    }
+
+    .tag-select:hover {
+        border-color: var(--tag-bg-hover);
+        background-color: var(--card-hover);
+    }
+
+    /* Style the dropdown options */
+    .tag-select option {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        padding: 1rem;
+    }
+
+    /* Style for Firefox */
+    .tag-select:-moz-focusring {
+        color: transparent;
+        text-shadow: 0 0 0 var(--text-color);
+    }
+
+    /* Style for Webkit browsers */
+    .tag-select::-ms-expand {
+        display: none;
+    }
+
+    @-moz-document url-prefix() {
+        .tag-select {
+            color: var(--text-color);
+            background-color: var(--card-bg);
+        }
+        
+        .tag-select option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+    }
+
+    /* Style for Chrome/Safari */
+    @media screen and (-webkit-min-device-pixel-ratio:0) {
+        .tag-select {
+            background-color: var(--card-bg);
+        }
+        
+        .tag-select option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+    }
+
+    .posts-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .post-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        border: 1px solid var(--tag-bg);
+    }
+
+    .post-card:hover {
+        transform: translateY(-4px);
+        background: var(--card-hover);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .post-content h2 {
+        margin: 0;
+        margin-bottom: 1rem;
+    }
+
+    .post-content h2 a {
+        color: var(--header-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .post-content h2 a:hover {
+        color: var(--text-muted);
+    }
+
+    .post-date {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .post-description {
+        color: var(--text-color);
+        margin: 0;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .post-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--tag-bg);
+        color: var(--text-color);
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .tag:hover {
+        background: var(--tag-bg-hover);
+        color: var(--text-color);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .blog-filters {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .search-container,
+        .tag-filters {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .blog-index {
+            padding: 1rem;
+        }
+
+        .post-card {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tagFilter = document.getElementById('tagFilter');
+    const postsContainer = document.getElementById('postsContainer');
+    const noResults = document.getElementById('noResults');
+    const posts = postsContainer.getElementsByClassName('post-card');
+
+    function filterPosts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedTag = tagFilter.value.toLowerCase();
+        let visiblePosts = 0;
+
+        Array.from(posts).forEach(post => {
+            const title = post.querySelector('h2 a').textContent.toLowerCase();
+            const description = post.querySelector('.post-description')?.textContent.toLowerCase() || '';
+            const tags = (post.dataset.tags || '').toLowerCase();
+            
+            const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+            const matchesTag = !selectedTag || tags.includes(selectedTag);
+
+            if (matchesSearch && matchesTag) {
+                post.style.display = '';
+                visiblePosts++;
+            } else {
+                post.style.display = 'none';
+            }
+        });
+
+        noResults.style.display = visiblePosts === 0 ? '' : 'none';
+    }
+
+    searchInput.addEventListener('input', filterPosts);
+    tagFilter.addEventListener('change', filterPosts);
+});
+</script>
+{% endblock %}
