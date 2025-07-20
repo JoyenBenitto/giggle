@@ -26,6 +26,7 @@
 
 
 import os
+import shutil
 import click
 import logging
 from giggle import utils
@@ -74,8 +75,8 @@ def cli():
 )
 
 @cli.command()
-def cook(build_dir, recipe, verbose, no_clear):
-    """Cooks a yummy website from the provided recipe"""
+def gen_static_site(build_dir, recipe, verbose, no_clear):
+    """Generate the static website"""
 
     logging.root.setLevel(verbose.upper())
     logger = logging.getLogger()
@@ -95,8 +96,8 @@ def cook(build_dir, recipe, verbose, no_clear):
     logger.info("building...")
     os.makedirs(build_dir,exist_ok=True)
     recipe= utils.load_yaml(recipe)
-    utils.mover(f"{here}/other_const/.htaccess", f"{build_dir}/.htaccess")
-    utils.mover(f"{here}/other_const/vercel.json`", f"{build_dir}/vercel.json`")
+    # utils.mover(f"{here}/other_const/.htaccess", f"{build_dir}/.htaccess")
+    # utils.mover(f"{here}/other_const/vercel.json`", f"{build_dir}/vercel.json`")
     ssg_inst= ssg.ssg(recipe=recipe,
                       build=build_dir)
     ssg_inst.generate()

@@ -102,6 +102,7 @@ class ssg():
 
     def tag_page_generator(self):
         """Generates tag site"""
+        os.makedirs(f"{self.build}/tags", exist_ok=True)
         tag_temp='<h1>Tags</h1>\n <div class="tag_holder">{tags_placeholder}</div>'
         tag_html=""
         tag_db= self.tag_db_creater()
@@ -132,7 +133,6 @@ class ssg():
                 back=".",
                 body= giggle_template.tag_site_head.format(
                     tag_list=list_ele))
-
             with open(f"{self.build}/tags/{page_name}","w") as file:
                 file.write(rendered_tag_page)
         tag_body=tag_temp.format(tags_placeholder=tag_html)
