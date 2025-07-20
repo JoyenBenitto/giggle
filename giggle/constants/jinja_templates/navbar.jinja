@@ -1,17 +1,10 @@
-{# Navigation template with modern styling #}
+{#Contains the navbar tempate for the page#}
+
+{%- set tag_list=[] -%}
+{%- for tags in  recipe.nav_items%}
+        {%- set tag_list = tag_list.append("<a href="+ back+ recipe.nav_items[tags].link + ">" + tags + "</a>") -%}
+{%- endfor %}
 
 <nav class="navbar">
-    <div class="nav-brand">
-        <a href="index.html">{{ recipe.site.title | default('My Website') }}</a>
-    </div>
-
-    <button class="nav-toggle" aria-label="Toggle navigation">
-        <span class="hamburger"></span>
-    </button>
-
-    <div class="nav-links">
-        {% for item in recipe.navigation %}
-            <a href="{{ item.url }}" class="nav-link">{{ item.title }} →</a>
-        {% endfor %}
-    </div>
+    <a href="{{back}}./index.html">{{recipe.chef}}</a> | <a href="{{back}}./tags.html">tags</a> - {{tag_list|join(" - ")}}
 </nav>

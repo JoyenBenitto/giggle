@@ -1,120 +1,32 @@
 {#base template for the page#}
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#0f172a">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    
-    <!-- Google Fonts -->
-    {{ recipe.fonts | safe }}
-    
-    <!-- Custom Styles -->
-    {% if css_path %}
-    <link rel="stylesheet" href="{{ css_path }}/style.css">
-    {% else %}
-    <link rel="stylesheet" href="./style.css">
-    {% endif %}
-    
-    <!-- Site Metadata -->
-    <title>{{ recipe.site.title | default('My Website') }}</title>
-    {% if recipe.site.description %}
-    <meta name="description" content="{{ recipe.site.description }}">
-    {% endif %}
-    {% if recipe.site.author %}
-    <meta name="author" content="{{ recipe.site.author }}">
-    {% endif %}
-    
-    <!-- Global Styles -->
-    <style>
-        /* Base container */
-        .container {
-            width: 100%;
-            max-width: 800px;  /* Fixed max-width for content */
-            margin: 0 auto;
-            padding: 0 1rem;
-            box-sizing: border-box;
-        }
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/tokyo-night-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
+    <link href="https://fonts.googleapis.com">
+    <link href="https://fonts.gstatic.com" crossorigin>
 
-        /* Content wrapper */
-        .markdown-content {
-            width: 100%;
-            max-width: 800px;  /* Match container width */
-            margin: 0 auto;
-            overflow-x: hidden;
-        }
+{{recipe.fonts}}
 
-        /* Global image handling */
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 2rem auto;
-        }
-
-        /* Figure handling */
-        figure {
-            width: 100%;
-            max-width: 800px;
-            margin: 2rem auto;
-            text-align: center;
-        }
-
-        figure img {
-            margin: 0 auto;
-            max-width: 100%;
-        }
-
-        figcaption {
-            margin-top: 0.5rem;
-            color: var(--text-muted, #94a3b8);
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        /* Table handling */
-        table {
-            width: 100%;
-            margin: 2rem 0;
-            border-collapse: collapse;
-        }
-
-        /* Responsive handling */
-        @media (max-width: 840px) {
-            .container,
-            .markdown-content,
-            figure {
-                max-width: calc(100% - 2rem);
-                margin: 0 auto;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container,
-            .markdown-content,
-            figure {
-                max-width: 100%;
-                padding: 0 1rem;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel= "stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title> {{recipe.title}} </title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>{{recipe["favicon"]}}</text></svg>"></link>
 </head>
 
 <body>
     <main class="container">
         {% include "navbar.jinja" %}
-        <div class="markdown-content">
-            {% block content %}
-            {{ body }}
-            {% endblock %}
-        </div>
+        {{body}}
         {% include "footer.jinja" %}
     </main>
-    <script src="./nav.js" defer></script>
 </body>
 </html>
