@@ -72,6 +72,7 @@ def gen_static_site(build_dir, recipe, verbose, no_clear):
     logger.info("building...")
     os.makedirs(build_dir,exist_ok=True)
     recipe= utils.load_yaml(recipe)
+    utils.mover(build_dir, recipe)
     # utils.mover(f"{here}/other_const/.htaccess", f"{build_dir}/.htaccess")
     # utils.mover(f"{here}/other_const/vercel.json`", f"{build_dir}/vercel.json`")
     ssg_inst= ssg.ssg(recipe=recipe,

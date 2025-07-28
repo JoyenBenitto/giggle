@@ -74,6 +74,7 @@ class ssg():
         self.build= kwargs["build"]
         self.blogs_path=None
         self.blog_list= None
+        self.theme= "game_black_green" #note this is supposed to come from the yaml or args
         if "blogs" in self.recipe["nav_items"]:
             self.blogs_path= self.recipe["nav_items"]["blogs"]["path"]
             self.blog_list=[]
@@ -120,7 +121,7 @@ class ssg():
         tag_html=""
         tag_db= self.tag_db_creater()
         environment = Environment(loader=FileSystemLoader(
-            f"{here}/constants/jinja_templates"))
+            f"{here}/constants/jinja_templates/{self.theme}"))
 
         for tag in tag_db:
             page_name= tag.replace("#","") +".html"
@@ -179,7 +180,7 @@ class ssg():
         """generates the static site"""
         logger.info("generating html srcs")
         environment = Environment(loader=FileSystemLoader(
-            f"{here}/constants/jinja_templates"))
+            f"{here}/constants/jinja_templates/{self.theme}"))
         template = environment.get_template("base.jinja")
 
         #rendering html src
@@ -209,7 +210,7 @@ class ssg():
         if self.blogs_path is not None:
             blog_body= self.blog_renderer()
             environment = Environment(loader=FileSystemLoader(
-                f"{here}/constants/jinja_templates"))
+                f"{here}/constants/jinja_templates/{self.theme}"))
             template = environment.get_template("base.jinja")
             rendered_blog= template.render(recipe=self.recipe,
                                             body= blog_body,

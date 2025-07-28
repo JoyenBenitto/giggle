@@ -163,6 +163,17 @@ code{
     border: 1px solid {{recipe["style"]["tag"]["color"]}}
 }
 
+strong, b {
+    color: #02F700;
+    font-weight: bold;
+}
+
+a[href^="http"]::after,
+a[href^="https"]::after {
+    content: " 🡕";
+    font-size: 0.8em;
+}
+
 .blog_headings{
   text-align: center;
 }

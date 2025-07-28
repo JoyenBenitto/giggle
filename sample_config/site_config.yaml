@@ -48,10 +48,7 @@ pages:
 
 # Feature Toggles
 features:
-  tag_pages: true
-  blog_pages: true
-  dark_mode: true
-  search: true
+  tag_pages: false
 
 # Assets to Move
 mover:
