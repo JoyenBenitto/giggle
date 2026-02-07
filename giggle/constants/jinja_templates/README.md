@@ -1,1 +1,0 @@
-The following directory consists of various themes and how you handle them

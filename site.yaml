@@ -1,0 +1,14 @@
+title: "Joyen Benitto"
+
+navbar:
+  - title: "Home"
+    path: "index.html"
+  - title: "About"
+    path: "about.html"
+    markdown: "pages/about.md"
+  - title: "Contact"
+    path: "contact.html"
+    markdown: "pages/contact.md"
+
+intro: |
+  Welcome to my personal archive of notes and research.

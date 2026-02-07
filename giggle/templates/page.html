@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% if navbar %}
+<nav>
+    {% for link in navbar %}
+    <a href="../{{ link.path }}">{{ link.title }}</a>
+    {% endfor %}
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<article>
+    {% if not navbar %}
+    <h1>{{ title }}</h1>
+    {% endif %}
+    
+    
+    <div class="content">
+        {{ content | safe }}
+    </div>
+    
+    
+    <div class="tags">
+        {% for tag in tags %}
+        <span class="tag">{{ tag }}</span>
+        {% endfor %}
+    </div>
+    
+</article>
+{% endblock %}
