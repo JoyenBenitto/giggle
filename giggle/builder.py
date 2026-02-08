@@ -192,8 +192,47 @@ class Builder:
         
         print(f"  Generated: index.html")
         
+        self._render_directory_index_pages(index_builder)
         self._render_external_pages()
         self._render_tag_pages()
+    
+    def _render_directory_index_pages(self, index_builder: IndexBuilder) -> None:
+        """Render index.html for each L1 directory."""
+        print("[*] Generating directory index pages...")
+        
+        navbar: list = self.config.get_navbar_links()
+        site_title: str = self.config.title
+        
+        for dir_name, dir_info in index_builder.l1_dirs.items():
+            if dir_name == 'root':
+                continue
+            
+            # Create index data for this directory, excluding the directory index itself
+            dir_pages: list[dict] = []
+            for page in sorted(dir_info.pages, key=lambda p: p['title']):
+                # Skip the directory index page (e.g., "Computer Architecture" in Computer Architecture dir)
+                if page['title'].lower() != dir_name.lower():
+                    # Get the relative path from the directory index
+                    full_path = page['html_path']
+                    # Remove the first directory part (L1 dir) to get relative path
+                    path_parts = full_path.split('/')
+                    relative_path = '/'.join(path_parts[1:]) if len(path_parts) > 1 else path_parts[-1]
+                    
+                    dir_pages.append({
+                        'title': page['title'],
+                        'link': relative_path,
+                        'tags': page['metadata'].get('tags', [])
+                    })
+            
+            # Render directory index page with navbar
+            index_html: str = self.engine.render_directory_index(dir_pages, navbar, site_title)
+            index_path: str = os.path.join(self.build_dir, dir_name, 'index.html')
+            os.makedirs(os.path.dirname(index_path), exist_ok=True)
+            
+            with open(index_path, 'w', encoding='utf-8') as f:
+                f.write(index_html)
+            
+            print(f"  Generated: {dir_name}/index.html")
     
     def _render_external_pages(self) -> None:
         """Render external markdown pages from config."""

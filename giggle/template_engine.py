@@ -69,6 +69,11 @@ class TemplateEngine:
         template = self.env.get_template('index.html')
         return template.render(pages=pages)
     
+    def render_directory_index(self, pages: list[dict], navbar: list = None, site_title: str = None) -> str:
+        """Render directory index page with navbar."""
+        template = self.env.get_template('index.html')
+        return template.render(pages=pages, navbar=navbar or [], site_title=site_title or 'Archive')
+    
     def render_main_index(self, index_data: dict, navbar: list = None, site_title: str = None, intro_html: str = None) -> str:
         """Render main index page with L1 directories."""
         template = self.env.get_template('main_index.html')
@@ -102,7 +107,7 @@ class TemplateEngine:
 </head>
 <body>
     <header>
-        <div class="logo"><a href="index.html" style="text-decoration: none; color: #000;">{{{{ site_title | default('Archive') }}}}</a></div>
+        <div class="logo"><a href="../index.html" style="text-decoration: none; color: #000;">{{{{ site_title | default('Archive') }}}}</a></div>
         {{% block navbar %}}{{% endblock %}}
     </header>
     {{% block content %}}{{% endblock %}}
@@ -166,12 +171,22 @@ class TemplateEngine:
         """Index template for listing pages."""
         return '''{% extends "base.html" %}
 
+{% block navbar %}
+{% if navbar %}
+<nav>
+    {% for link in navbar %}
+    <a href="../{{ link.path }}">{{ link.title }}</a>
+    {% endfor %}
+</nav>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <h1>Index</h1>
 <ul>
     {% for page in pages %}
     <li>
-        <a href="{{ page.html_path }}">{{ page.title }}</a>
+        <a href="{{ page.link }}">{{ page.title }}</a>
         {% if page.description %}
         <p>{{ page.description }}</p>
         {% endif %}
