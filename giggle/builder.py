@@ -80,7 +80,14 @@ class Builder:
                         post = frontmatter.load(f)
                     title: str = post.metadata.get('title', os.path.splitext(file)[0])
                     is_index: bool = post.metadata.get('is_index', False)
-                    html_name: str = 'index.html' if is_index else self._get_html_name(title)
+                    is_pdf: bool = post.metadata.get('is_pdf', False)
+                    stem: str = os.path.splitext(file)[0]  # preserve original filename
+                    if is_index:
+                        html_name = 'index.html'
+                    elif is_pdf:
+                        html_name = stem + '.pdf'
+                    else:
+                        html_name = stem + '.html'
                     self.path_resolver.register_page(file_path, title, html_name, self.temp_dir)
 
     def _copy_images(self) -> None:

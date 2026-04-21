@@ -118,6 +118,39 @@ def load_markdown(file_path: str, page_path: PagePath) -> MarkdownFile:
         page_path=page_path
     )
 
+def rewrite_md_links(content: str, path_resolver: 'PathResolver' = None) -> str:
+    """Rewrite [text](./Foo.md) links to .html or .pdf based on registered pages."""
+    import urllib.parse
+
+    def replace(match) -> str:
+        alt: str = match.group(1)
+        href: str = match.group(2)
+        if href.startswith(('http://', 'https://', '#')):
+            return match.group(0)
+        if not href.lower().endswith('.md'):
+            return match.group(0)
+
+        # Decode URL-encoding to get the stem (e.g. Abstract%20Models -> Abstract Models)
+        decoded: str = urllib.parse.unquote(href)
+        stem: str = os.path.splitext(os.path.basename(decoded))[0]
+
+        # Look up in path_resolver to find the correct extension
+        ext = '.html'
+        if path_resolver:
+            page = path_resolver.find_page_by_title(stem)
+            if page and page.html_name.endswith('.pdf'):
+                ext = '.pdf'
+
+        # Rebuild href preserving directory prefix, swapping extension
+        dir_part: str = os.path.dirname(href)
+        # Re-encode the stem for the URL
+        new_name: str = urllib.parse.quote(stem) + ext
+        new_href: str = dir_part + '/' + new_name if dir_part else new_name
+        return f'[{alt}]({new_href})'
+
+    return re.sub(r'\[([^\]]*)\]\(([^)]+)\)', replace, content)
+
+
 def process_markdown_file(src_path: str, dest_path: str, page_path: PagePath, path_resolver: PathResolver) -> MarkdownFile:
     """Load markdown, resolve links and images, and save to destination."""
     md_file: MarkdownFile = load_markdown(src_path, page_path)
@@ -125,6 +158,7 @@ def process_markdown_file(src_path: str, dest_path: str, page_path: PagePath, pa
     md_file.content = resolve_obsidian_links(md_file.content, page_path, path_resolver)
     md_file.content = resolve_obsidian_images(md_file.content, page_path.rel_dir)
     md_file.content = resolve_image_paths(md_file.content, page_path.rel_dir)
+    md_file.content = rewrite_md_links(md_file.content, path_resolver)
     
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, 'w', encoding='utf-8') as f:

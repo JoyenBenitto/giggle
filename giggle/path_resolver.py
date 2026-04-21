@@ -78,7 +78,15 @@ class PathResolver:
             page = self.title_to_page.get(f"{rel_dir}/{title}")
             if page:
                 return page
-        return self.title_to_page.get(title)
+        # exact root-level match
+        page = self.title_to_page.get(title)
+        if page:
+            return page
+        # fallback: scan all pages for matching title (handles subdirectory pages)
+        for page in self.title_to_page.values():
+            if page.title == title:
+                return page
+        return None
 
     def compute_link(self, from_page: PagePath, to_title: str) -> Optional[str]:
         """Compute relative link from one page to another by title."""
