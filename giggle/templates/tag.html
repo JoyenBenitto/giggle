@@ -1,12 +1,59 @@
-{% extends "base.html" %}
-{% block title %}#{{ tag }}{% endblock %}
-{% block content %}
-<main class="main-container">
-  <h1>#{{ tag }}</h1>
-  <ul>
-    {% for page in pages %}
-    <li><a href="../{{ page.link }}">{{ page.title }}</a></li>
-    {% endfor %}
-  </ul>
-</main>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Articles tagged with {{ tag }} — Knowledge Archive">
+    <meta name="author" content="Joyen Benitto">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ tag }} — Knowledge Archive">
+    <meta property="og:url" content="https://joyenbenitto.com/tags/{{ tag }}.html">
+    <link rel="canonical" href="https://joyenbenitto.com/tags/{{ tag }}.html">
+    <title>{{ tag }}</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="manifesto-header">
+            <h1>Filtered Index: <u class="squiglly">#{{ tag }}</u></h1>
+        </div>
+        <hr class="section-divider" />
+        <div class="tagged-articles">
+        {%- for article in articles %}
+            <article class="note">
+                <h3><a href="../{{ article.link }}">{{ article.title }}</a></h3>
+                {%- if article.tags %}
+                <div class="tags">
+                    {%- for t in article.tags | sort %}
+                        <a href="/tags/{{ t }}.html">#{{ t }}</a>{% if not loop.last %} &nbsp; {% endif %}
+                    {%- endfor %}
+                </div>
+                {%- endif %}
+            </article>
+        {%- endfor %}
+        </div>
+    </main>
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
+    </div>
+</footer>
+</body>
+</html>

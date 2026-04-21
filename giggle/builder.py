@@ -43,6 +43,7 @@ class Builder:
             self._build_file_map()
             self._copy_images()
             self._copy_css()
+            self._copy_constants()
             self._process_files()
             self._render_html()
             self._render_index_pages()
@@ -89,6 +90,13 @@ class Builder:
         """Copy style.css to build root so pages can link to it."""
         if os.path.exists(self.css_file):
             shutil.copy2(self.css_file, os.path.join(self.build_dir, 'style.css'))
+
+    def _copy_constants(self) -> None:
+        """Copy constants/ assets (images etc.) to build/constants/."""
+        src = os.path.join(self.constants_dir, 'images')
+        dst = os.path.join(self.build_dir, 'constants')
+        if os.path.exists(src):
+            shutil.copytree(src, dst, dirs_exist_ok=True)
 
     def _process_files(self) -> None:
         print("[*] Processing markdown files...")
@@ -206,8 +214,21 @@ class Builder:
             f.write(main_index_html)
         print("  Generated: index.html")
 
+        self._render_static_pages()
         self._render_external_pages()
         self._render_tag_pages()
+
+    def _render_static_pages(self) -> None:
+        """Render built-in static pages: About.html and Contact.html."""
+        about_html = self.engine.render_about()
+        with open(os.path.join(self.build_dir, 'About.html'), 'w', encoding='utf-8') as f:
+            f.write(about_html)
+
+        contact_html = self.engine.render_contact()
+        with open(os.path.join(self.build_dir, 'Contact.html'), 'w', encoding='utf-8') as f:
+            f.write(contact_html)
+
+        print("  Generated: About.html, Contact.html")
 
     def _render_external_pages(self) -> None:
         print("[*] Generating external pages...")

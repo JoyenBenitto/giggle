@@ -34,7 +34,8 @@ class TagGenerator:
                 'pages': [
                     {
                         'title': page['title'],
-                        'link': page['html_path']
+                        'link': page['html_path'],
+                        'tags': page['metadata'].get('tags', []),
                     }
                     for page in pages_with_tag
                 ],

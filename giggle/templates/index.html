@@ -1,15 +1,77 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Knowledge archive of technical notes on algorithms, programming languages, computer architecture, and systems design by Joyen Benitto.">
+    <meta name="keywords" content="algorithms, programming languages, computer architecture, systems design, notes, archive, Joyen, Joyen Benitto">
+    <meta name="author" content="Joyen Benitto">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#f5f5f5">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FTP site">
+    <meta property="og:description" content="Technical notes, thoughts and research on algorithms, PL, comp arch and systems.">
+    <meta property="og:url" content="https://joyenbenitto.com">
+    <meta property="og:site_name" content="FTP Site">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FTP site - Joyen Benitto">
+    <meta name="twitter:description" content="Technical notes, thoughts and research on algorithms, PL, comp arch and systems.">
+    <link rel="canonical" href="https://joyenbenitto.com">
+    <title>FTP site - Joyen Benitto</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
 
-{% block content %}
-<h1>Index</h1>
-<ul>
-    {% for page in pages %}
-    <li>
-        <a href="{{ page.html_path }}">{{ page.title }}</a>
-        {% if page.description %}
-        <p>{{ page.description }}</p>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
-{% endblock %}
+    <main class="main-container">
+    <section class="artwork">
+        <img src="./constants/misty_mountains.jpg" alt="System Landscape" />
+    </section>
+
+    <section class="about-manifesto">
+        <h1>Index: FTP Site</h1>
+        <div class="dense-text">
+            <p>
+                This <u class="squiglly">FTP site</u> is an incremental repository for the structured decomposition of
+                complex systems. It functions as a persistent memory buffer for research at the intersection
+                of algorithms, PL theory, and computer architecture.
+            </p>
+        </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    {%- for entry in entries %}
+        <article class="note">
+            <h3><a href="{{ entry.link }}">{{ entry.name }}</a></h3>
+            {%- if entry.tags %}
+                <div class="tags">
+                {%- for tag in entry.tags | sort %}
+                    <a href="/tags/{{ tag }}.html">#{{ tag }}</a>{% if not loop.last %} &nbsp; {% endif %}
+                {%- endfor %}
+                </div>
+            {%- endif %}
+        </article>
+    {%- endfor %}
+    </main>
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
+    </div>
+</footer>
+</body>
+</html>

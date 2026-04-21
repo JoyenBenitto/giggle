@@ -1,15 +1,53 @@
-{% extends "base.html" %}
-{% block content %}
-<main class="main-container">
-  <article>
-    {{ body | safe }}
-    {% if tags %}
-    <div class="tags">
-      {% for tag in tags %}
-      <a href="{{ css_path | replace("style.css","") }}tags/{{ tag }}.html" class="tag-link">{{ tag }}</a>
-      {% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if description %}<meta name="description" content="{{ description }}">{% endif %}
+    <meta name="author" content="Joyen Benitto">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ css_path }}" />
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$","$"],["\\(","\\)"]],
+                displayMath: [["$$","$$"],["\\[","\\]"]]
+            }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        {{ body | safe }}
+        {% if tags %}
+        <div class="tags">
+            {%- for tag in tags %}
+            <a href="/tags/{{ tag }}.html">#{{ tag }}</a>{% if not loop.last %} &nbsp; {% endif %}
+            {%- endfor %}
+        </div>
+        {% endif %}
+    </main>
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
     </div>
-    {% endif %}
-  </article>
-</main>
-{% endblock %}
+</footer>
+</body>
+</html>

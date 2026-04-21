@@ -1,9 +1,10 @@
 import os
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
 class TemplateEngine:
-    """Jinja2 template engine for layout pages (index, tags, nav wrappers)."""
+    """Jinja2 template engine for all site pages."""
 
     def __init__(self, template_dir: str, css_file: str = None) -> None:
         self.template_dir: str = template_dir
@@ -14,17 +15,29 @@ class TemplateEngine:
         )
         self._create_default_templates()
 
+    def _now(self) -> str:
+        return datetime.now().strftime('%Y-%m-%d')
+
     def _create_default_templates(self) -> None:
         templates: dict = {
-            'base.html': _BASE_TEMPLATE,
-            'page.html': _PAGE_TEMPLATE,
-            'main_index.html': _MAIN_INDEX_TEMPLATE,
-            'tag.html': _TAG_TEMPLATE,
+            'index.html':   _INDEX_TEMPLATE,
+            'page.html':    _PAGE_TEMPLATE,
+            'about.html':   _ABOUT_TEMPLATE,
+            'contact.html': _CONTACT_TEMPLATE,
+            'tag.html':     _TAG_TEMPLATE,
         }
         for filename, content in templates.items():
             filepath: str = os.path.join(self.template_dir, filename)
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
+
+    def render_main_index(self, index_data: dict, navbar: list = None,
+                          site_title: str = None, intro_html: str = None) -> str:
+        template = self.env.get_template('index.html')
+        return template.render(
+            entries=index_data.get('entries', []),
+            current_datetime=self._now(),
+        )
 
     def render_page(self, title: str, body: str, metadata: dict,
                     navbar: list = None, site_title: str = None,
@@ -35,127 +48,361 @@ class TemplateEngine:
             body=body,
             description=metadata.get('description', ''),
             tags=metadata.get('tags', []),
-            navbar=navbar or [],
-            site_title=site_title or 'Archive',
             css_path=css_path,
+            current_datetime=self._now(),
         )
 
-    def render_main_index(self, index_data: dict, navbar: list = None,
-                          site_title: str = None, intro_html: str = None) -> str:
-        template = self.env.get_template('main_index.html')
-        return template.render(
-            **index_data,
-            navbar=navbar or [],
-            site_title=site_title or 'Archive',
-            intro_html=intro_html or '',
-            css_path='style.css',
-        )
+    def render_about(self) -> str:
+        template = self.env.get_template('about.html')
+        return template.render(current_datetime=self._now())
+
+    def render_contact(self) -> str:
+        template = self.env.get_template('contact.html')
+        return template.render(current_datetime=self._now())
 
     def render_tag_page(self, tag_data: dict) -> str:
         template = self.env.get_template('tag.html')
-        return template.render(**tag_data, css_path='../style.css')
+        return template.render(
+            tag=tag_data['tag'],
+            articles=tag_data['pages'],
+            current_datetime=self._now(),
+        )
 
 
-# ── Templates ─────────────────────────────────────────────────────────────────
+# ── Templates — ported directly from vaults/builder_template/templates/ ──────
 
-_BASE_TEMPLATE = '''\
+_INDEX_TEMPLATE = '''\
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{{ title }}{% endblock %} — {{ site_title }}</title>
-  <link rel="stylesheet" href="{{ css_path }}">
-  <script>
-    MathJax = {
-      tex: {
-        inlineMath: [["$","$"],["\\\\(","\\\\)"]],
-        displayMath: [["$$","$$"],["\\\\[","\\\\]"]]
-      }
-    };
-  </script>
-  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Knowledge archive of technical notes on algorithms, programming languages, computer architecture, and systems design by Joyen Benitto.">
+    <meta name="keywords" content="algorithms, programming languages, computer architecture, systems design, notes, archive, Joyen, Joyen Benitto">
+    <meta name="author" content="Joyen Benitto">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#f5f5f5">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FTP site">
+    <meta property="og:description" content="Technical notes, thoughts and research on algorithms, PL, comp arch and systems.">
+    <meta property="og:url" content="https://joyenbenitto.com">
+    <meta property="og:site_name" content="FTP Site">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FTP site - Joyen Benitto">
+    <meta name="twitter:description" content="Technical notes, thoughts and research on algorithms, PL, comp arch and systems.">
+    <link rel="canonical" href="https://joyenbenitto.com">
+    <title>FTP site - Joyen Benitto</title>
+    <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-<header>
-  <div class="nav-inner">
-    <div class="logo"><a href="/">{{ site_title }}</a></div>
-    {% if navbar %}
-    <nav>
-      {% for link in navbar %}
-        {% if link.url %}
-          <a href="{{ link.url }}">{{ link.title }}</a>
-        {% else %}
-          <a href="/{{ link.path }}">{{ link.title }}</a>
-        {% endif %}
-      {% endfor %}
-    </nav>
-    {% endif %}
-  </div>
-</header>
-{% block content %}{% endblock %}
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+    <section class="artwork">
+        <img src="./constants/misty_mountains.jpg" alt="System Landscape" />
+    </section>
+
+    <section class="about-manifesto">
+        <h1>Index: FTP Site</h1>
+        <div class="dense-text">
+            <p>
+                This <u class="squiglly">FTP site</u> is an incremental repository for the structured decomposition of
+                complex systems. It functions as a persistent memory buffer for research at the intersection
+                of algorithms, PL theory, and computer architecture.
+            </p>
+        </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    {%- for entry in entries %}
+        <article class="note">
+            <h3><a href="{{ entry.link }}">{{ entry.name }}</a></h3>
+            {%- if entry.tags %}
+                <div class="tags">
+                {%- for tag in entry.tags | sort %}
+                    <a href="/tags/{{ tag }}.html">#{{ tag }}</a>{% if not loop.last %} &nbsp; {% endif %}
+                {%- endfor %}
+                </div>
+            {%- endif %}
+        </article>
+    {%- endfor %}
+    </main>
+
 <footer>
-  <div class="footer-inner">
-    <p>{{ site_title }}</p>
-  </div>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
+    </div>
 </footer>
 </body>
 </html>
 '''
 
 _PAGE_TEMPLATE = '''\
-{% extends "base.html" %}
-{% block content %}
-<main class="main-container">
-  <article>
-    {{ body | safe }}
-    {% if tags %}
-    <div class="tags">
-      {% for tag in tags %}
-      <a href="{{ css_path | replace("style.css","") }}tags/{{ tag }}.html" class="tag-link">{{ tag }}</a>
-      {% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if description %}<meta name="description" content="{{ description }}">{% endif %}
+    <meta name="author" content="Joyen Benitto">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ css_path }}" />
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$","$"],["\\\\(","\\\\)"]],
+                displayMath: [["$$","$$"],["\\\\[","\\\\]"]]
+            }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        {{ body | safe }}
+        {% if tags %}
+        <div class="tags">
+            {%- for tag in tags %}
+            <a href="/tags/{{ tag }}.html">#{{ tag }}</a>{% if not loop.last %} &nbsp; {% endif %}
+            {%- endfor %}
+        </div>
+        {% endif %}
+    </main>
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
     </div>
-    {% endif %}
-  </article>
-</main>
-{% endblock %}
+</footer>
+</body>
+</html>
 '''
 
-_MAIN_INDEX_TEMPLATE = '''\
-{% extends "base.html" %}
-{% block content %}
+_ABOUT_TEMPLATE = '''\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="About Joyen Benitto - A knowledge archive for technical notes on algorithms, programming languages, computer architecture, and systems design.">
+    <meta name="author" content="Joyen Benitto">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="About">
+    <meta property="og:url" content="https://joyenbenitto.com/About.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="About">
+    <link rel="canonical" href="https://joyenbenitto.com/About.html">
+    <title>About</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
 <main class="main-container">
-  {% if intro_html %}
-  <div class="intro">{{ intro_html | safe }}</div>
-  {% endif %}
-  {% for entry in entries %}
-  <div class="index-entry">
-    <h2><a href="{{ entry.link }}">{{ entry.name }}</a></h2>
-    {% if entry.description %}<p>{{ entry.description }}</p>{% endif %}
-    {% if entry.tags %}
-    <p class="entry-tags">
-      {% for tag in entry.tags %}
-      <a href="tags/{{ tag }}.html" class="tag-link">{{ tag }}</a>{% if not loop.last %} {% endif %}
-      {% endfor %}
-    </p>
-    {% endif %}
-  </div>
-  {% endfor %}
+    <section class="about-manifesto">
+        <div class="manifesto-header">
+            <h1>About</h1>
+            <figure class="reference-asset">
+                <img src="./constants/joyenBenitto.jpg" alt="JOYEN BENITTO">
+                <figcaption>Me not so long ago!</figcaption>
+            </figure>
+        </div>
+        <div class="dense-text">
+            <p>
+                I design systems across abstraction boundaries from software models
+                to micro-architecture. My work lives at the intersection of
+                computer architecture, design automation, and high-performance systems.
+            </p>
+            <p>
+                Although I am in my early days of my research journey. I use this
+                site as a medium to share my thoughts, notes and research insights
+                on what I observe when I tinker around these systems.
+            </p>
+        </div>
+    </section>
 </main>
-{% endblock %}
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
+    </div>
+</footer>
+</body>
+</html>
+'''
+
+_CONTACT_TEMPLATE = '''\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Joyen Benitto - Get in touch via email, visit the website, or connect on GitHub.">
+    <meta name="author" content="Joyen Benitto">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Contact">
+    <meta property="og:url" content="https://joyenbenitto.com/Contact.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Contact — Joyen Benitto">
+    <link rel="canonical" href="https://joyenbenitto.com/Contact.html">
+    <title>Contact</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+<main class="main-container">
+    <section class="about-manifesto">
+        <div class="manifesto-header">
+            <h1>Reach out to me!</h1>
+        </div>
+        <div class="dense-text">
+            <p>
+                For technical inquiries, research collaboration, or system feedback,
+                utilize the following.
+            </p>
+            <div class="specs">
+                <div class="endpoint">
+                    <span class="label">Mail:</span>
+                    <span class="value">joyen.benitto12 [at] gmail [dot] com</span>
+                </div>
+                <div class="endpoint">
+                    <span class="label">Linkedin:</span>
+                    <span class="value"><a href="https://www.linkedin.com/in/joyenbenitto/">www.linkedin.com/in/joyen-benitto/</a></span>
+                </div>
+                <div class="endpoint">
+                    <span class="label">GIT:</span>
+                    <span class="value"><a href="https://github.com/joyenbenitto">github.com/joyenbenitto</a></span>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
+    </div>
+</footer>
+</body>
+</html>
 '''
 
 _TAG_TEMPLATE = '''\
-{% extends "base.html" %}
-{% block title %}#{{ tag }}{% endblock %}
-{% block content %}
-<main class="main-container">
-  <h1>#{{ tag }}</h1>
-  <ul>
-    {% for page in pages %}
-    <li><a href="../{{ page.link }}">{{ page.title }}</a></li>
-    {% endfor %}
-  </ul>
-</main>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Articles tagged with {{ tag }} — Knowledge Archive">
+    <meta name="author" content="Joyen Benitto">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ tag }} — Knowledge Archive">
+    <meta property="og:url" content="https://joyenbenitto.com/tags/{{ tag }}.html">
+    <link rel="canonical" href="https://joyenbenitto.com/tags/{{ tag }}.html">
+    <title>{{ tag }}</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <header>
+        <div class="nav-inner">
+            <div class="logo"><a href="/">FTP SITE</a></div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/About.html">About</a>
+                <a href="/Contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="manifesto-header">
+            <h1>Filtered Index: <u class="squiglly">#{{ tag }}</u></h1>
+        </div>
+        <hr class="section-divider" />
+        <div class="tagged-articles">
+        {%- for article in articles %}
+            <article class="note">
+                <h3><a href="../{{ article.link }}">{{ article.title }}</a></h3>
+                {%- if article.tags %}
+                <div class="tags">
+                    {%- for t in article.tags | sort %}
+                        <a href="/tags/{{ t }}.html">#{{ t }}</a>{% if not loop.last %} &nbsp; {% endif %}
+                    {%- endfor %}
+                </div>
+                {%- endif %}
+            </article>
+        {%- endfor %}
+        </div>
+    </main>
+
+<footer>
+    <div class="footer-inner">
+        <p>JOYEN BENITTO</p>
+        <p class="system-status">
+            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
+            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
+        </p>
+    </div>
+</footer>
+</body>
+</html>
 '''
