@@ -20,11 +20,9 @@ class TemplateEngine:
 
     def _create_default_templates(self) -> None:
         templates: dict = {
-            'index.html':   _INDEX_TEMPLATE,
-            'page.html':    _PAGE_TEMPLATE,
-            'about.html':   _ABOUT_TEMPLATE,
-            'contact.html': _CONTACT_TEMPLATE,
-            'tag.html':     _TAG_TEMPLATE,
+            'index.html': _INDEX_TEMPLATE,
+            'page.html':  _PAGE_TEMPLATE,
+            'tag.html':   _TAG_TEMPLATE,
         }
         for filename, content in templates.items():
             filepath: str = os.path.join(self.template_dir, filename)
@@ -51,14 +49,6 @@ class TemplateEngine:
             css_path=css_path,
             current_datetime=self._now(),
         )
-
-    def render_about(self) -> str:
-        template = self.env.get_template('about.html')
-        return template.render(current_datetime=self._now())
-
-    def render_contact(self) -> str:
-        template = self.env.get_template('contact.html')
-        return template.render(current_datetime=self._now())
 
     def render_tag_page(self, tag_data: dict) -> str:
         template = self.env.get_template('tag.html')
@@ -193,144 +183,6 @@ _PAGE_TEMPLATE = '''\
         </div>
         {% endif %}
     </main>
-
-<footer>
-    <div class="footer-inner">
-        <p>JOYEN BENITTO</p>
-        <p class="system-status">
-            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
-            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
-        </p>
-    </div>
-</footer>
-</body>
-</html>
-'''
-
-_ABOUT_TEMPLATE = '''\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="About Joyen Benitto - A knowledge archive for technical notes on algorithms, programming languages, computer architecture, and systems design.">
-    <meta name="author" content="Joyen Benitto">
-    <meta name="robots" content="index, follow">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="About">
-    <meta property="og:url" content="https://joyenbenitto.com/About.html">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="About">
-    <link rel="canonical" href="https://joyenbenitto.com/About.html">
-    <title>About</title>
-    <link rel="stylesheet" href="./style.css" />
-</head>
-<body>
-    <header>
-        <div class="nav-inner">
-            <div class="logo"><a href="/">FTP SITE</a></div>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/About.html">About</a>
-                <a href="/Contact.html">Contact</a>
-            </nav>
-        </div>
-    </header>
-
-<main class="main-container">
-    <section class="about-manifesto">
-        <div class="manifesto-header">
-            <h1>About</h1>
-            <figure class="reference-asset">
-                <img src="./constants/joyenBenitto.jpg" alt="JOYEN BENITTO">
-                <figcaption>Me not so long ago!</figcaption>
-            </figure>
-        </div>
-        <div class="dense-text">
-            <p>
-                I design systems across abstraction boundaries from software models
-                to micro-architecture. My work lives at the intersection of
-                computer architecture, design automation, and high-performance systems.
-            </p>
-            <p>
-                Although I am in my early days of my research journey. I use this
-                site as a medium to share my thoughts, notes and research insights
-                on what I observe when I tinker around these systems.
-            </p>
-        </div>
-    </section>
-</main>
-
-<footer>
-    <div class="footer-inner">
-        <p>JOYEN BENITTO</p>
-        <p class="system-status">
-            <a href="/CHANGELOG.html" class="changelog_footer">UPDATED:</a>
-            <time datetime="{{ current_datetime }}">{{ current_datetime }}</time>
-        </p>
-    </div>
-</footer>
-</body>
-</html>
-'''
-
-_CONTACT_TEMPLATE = '''\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Contact Joyen Benitto - Get in touch via email, visit the website, or connect on GitHub.">
-    <meta name="author" content="Joyen Benitto">
-    <meta name="robots" content="index, follow">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Contact">
-    <meta property="og:url" content="https://joyenbenitto.com/Contact.html">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Contact — Joyen Benitto">
-    <link rel="canonical" href="https://joyenbenitto.com/Contact.html">
-    <title>Contact</title>
-    <link rel="stylesheet" href="./style.css" />
-</head>
-<body>
-    <header>
-        <div class="nav-inner">
-            <div class="logo"><a href="/">FTP SITE</a></div>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/About.html">About</a>
-                <a href="/Contact.html">Contact</a>
-            </nav>
-        </div>
-    </header>
-
-<main class="main-container">
-    <section class="about-manifesto">
-        <div class="manifesto-header">
-            <h1>Reach out to me!</h1>
-        </div>
-        <div class="dense-text">
-            <p>
-                For technical inquiries, research collaboration, or system feedback,
-                utilize the following.
-            </p>
-            <div class="specs">
-                <div class="endpoint">
-                    <span class="label">Mail:</span>
-                    <span class="value">joyen.benitto12 [at] gmail [dot] com</span>
-                </div>
-                <div class="endpoint">
-                    <span class="label">Linkedin:</span>
-                    <span class="value"><a href="https://www.linkedin.com/in/joyenbenitto/">www.linkedin.com/in/joyen-benitto/</a></span>
-                </div>
-                <div class="endpoint">
-                    <span class="label">GIT:</span>
-                    <span class="value"><a href="https://github.com/joyenbenitto">github.com/joyenbenitto</a></span>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
 
 <footer>
     <div class="footer-inner">

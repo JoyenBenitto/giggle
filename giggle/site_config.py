@@ -40,13 +40,17 @@ class SiteConfig:
         return links
     
     def get_external_pages(self) -> List[Dict]:
-        """Get external markdown pages to render."""
+        """Get external markdown pages to render, resolving paths relative to config file."""
+        config_dir = os.path.dirname(os.path.abspath(self.config_file)) if self.config_file else ''
         pages = []
         for page in self.navbar_pages:
             if page.get('markdown'):
+                md_path = page.get('markdown', '')
+                if config_dir and not os.path.isabs(md_path):
+                    md_path = os.path.join(config_dir, md_path)
                 pages.append({
                     'title': page.get('title', ''),
                     'path': page.get('path', ''),
-                    'markdown': page.get('markdown', '')
+                    'markdown': md_path,
                 })
         return pages

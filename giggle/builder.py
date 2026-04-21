@@ -222,21 +222,8 @@ class Builder:
             f.write(main_index_html)
         print("  Generated: index.html")
 
-        self._render_static_pages()
         self._render_external_pages()
         self._render_tag_pages()
-
-    def _render_static_pages(self) -> None:
-        """Render built-in static pages: About.html and Contact.html."""
-        about_html = self.engine.render_about()
-        with open(os.path.join(self.build_dir, 'About.html'), 'w', encoding='utf-8') as f:
-            f.write(about_html)
-
-        contact_html = self.engine.render_contact()
-        with open(os.path.join(self.build_dir, 'Contact.html'), 'w', encoding='utf-8') as f:
-            f.write(contact_html)
-
-        print("  Generated: About.html, Contact.html")
 
     def _render_external_pages(self) -> None:
         print("[*] Generating external pages...")
