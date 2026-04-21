@@ -1,32 +1,21 @@
 {% extends "base.html" %}
-
-{% block navbar %}
-{% if navbar %}
-<nav>
-    {% for link in navbar %}
-    <a href="{{ link.path }}">{{ link.title }}</a>
-    {% endfor %}
-</nav>
-{% endif %}
-{% endblock %}
-
 {% block content %}
-{% if intro_html %}
-<div class="intro">
-    {{ intro_html | safe }}
-</div>
-{% endif %}
-
-{% for entry in entries %}
-<div class="index-entry">
+<main class="main-container">
+  {% if intro_html %}
+  <div class="intro">{{ intro_html | safe }}</div>
+  {% endif %}
+  {% for entry in entries %}
+  <div class="index-entry">
     <h2><a href="{{ entry.link }}">{{ entry.name }}</a></h2>
+    {% if entry.description %}<p>{{ entry.description }}</p>{% endif %}
     {% if entry.tags %}
     <p class="entry-tags">
-        {% for tag in entry.tags %}
-        <a href="tags/{{ tag }}.html" class="tag-link">{{ tag }}</a>{% if not loop.last %}; {% endif %}
-        {% endfor %}
+      {% for tag in entry.tags %}
+      <a href="tags/{{ tag }}.html" class="tag-link">{{ tag }}</a>{% if not loop.last %} {% endif %}
+      {% endfor %}
     </p>
     {% endif %}
-</div>
-{% endfor %}
+  </div>
+  {% endfor %}
+</main>
 {% endblock %}

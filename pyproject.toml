@@ -4,34 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "giggle"
-version = "0.2.0"
-description = "A modern static site generator with enhanced configuration management"
+version = "0.3.0"
+description = "Static site generator with Pandoc backend"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Joyen Benitto", email = "joyen.benitto@gmail.com"}
 ]
-keywords = ["static-site-generator", "blog", "website", "markdown", "jinja2"]
+keywords = ["static-site-generator", "pandoc", "markdown", "jinja2", "obsidian"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Topic :: Internet :: WWW/HTTP :: Site Management",
-    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
     "click>=8.0.0",
     "Jinja2>=3.0.0",
     "PyYAML>=6.0.0",
-    "markdown>=3.4.0",
     "python-frontmatter>=1.0.0",
     "livereload>=2.6.0",
     "watchdog>=2.1.0",
-    "pygments>=2.13.0"
 ]
 
 [project.urls]
@@ -45,10 +41,7 @@ packages = ["giggle"]
 
 [tool.setuptools.package-data]
 giggle = [
-    "themes/modern/templates/*.html",
-    "themes/modern/assets/css/*.css",
-    "themes/modern/assets/js/*.js",
-    "themes/basic/templates/*.html",
-    "themes/basic/assets/css/*.css",
-    "themes/basic/assets/js/*.js"
+    "constants/*.css",
+    "constants/*.template",
+    "constants/images/*",
 ]

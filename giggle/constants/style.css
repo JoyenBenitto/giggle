@@ -1,194 +1,548 @@
+/* FTP SITE // KAIZEN ARCHIVAL THEME 2026
+   Branding: Joyen Genz / Technical Minimalist / Stoic Rigor
+*/
+
+:root {
+  --paper: #f0eee6;           /* Warm Paper Background */
+  --carbon: #141413;          /* Deep Charcoal Text/Blocks */
+  --pastel: #faf9f6;          /* Off-White for Dark Sections */
+  --accent: #a0a09a;          /* Muted Grey for Metadata */
+  --width: 850px;             /* Expanded for grid density and air */
+  --font-serif: 'et-book', Georgia, serif;
+  --font-ui: 'Noto Sans', sans-serif;
+  --font-mono: 'Monaco', 'Ubuntu Mono', monospace;
+}
+
+/* 1. Global Foundation */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
 html {
-  font-size: 62.5%;
+  font-size: 62.5%; /* 10px base for easy rem calculation */
+  background-color: var(--carbon); 
 }
 
 body {
   font-size: 1.6rem;
-  color: #000;
   line-height: 1.6;
+  background-color: var(--paper);
+  color: var(--carbon);
+  font-family: var(--font-serif);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-header {
-  border-bottom: 0.1rem solid #000;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+/* 2. Symmetrical Header & Footer */
+header, footer {
+  background-color: var(--carbon);
+  color: var(--pastel);
+  padding: 2.5rem 0;
+  width: 100%;
 }
 
+.nav-inner, .footer-inner {
+  max-width: var(--width);
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 3. The Free-Flowing Navbar */
 nav {
-  text-align: right;
+  display: flex;
+  gap: 4.5rem; /* Wide tracking for gallery feel */
+}
+
+.logo a, nav a, footer p {
+  color: var(--pastel);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.25rem;
 }
 
 nav a {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: black;
-  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+nav a:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+/* 4. Main Layout & Artwork */
+.main-container {
+  flex: 1;
+  width: 100%;
+  max-width: var(--width);
+  margin: 4rem auto 10rem;
+  padding: 0 3rem;
+}
+
+.artwork {
+  margin: 0 auto 5rem auto;
+  text-align: center;
+}
+
+.artwork img {
+  max-width: 100%;
+  height: auto;
+  mix-blend-mode: multiply; /* Blends artwork into the paper background */
+  opacity: 0.8;
+  filter: contrast(105%);
+  mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+}
+
+/* 5. The Stoic System Specification (De-Squashed) */
+.about-manifesto {
+  margin: 6rem 0;
+  align-items: start;
+}
+
+.about-manifesto h1 {
+  font-size: 4.8rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.15rem;
+  color: var(--carbon);
+  text-transform: capitalize;
+}
+
+.dense-text {
+  font-size: 1.7rem;
+  line-height: 1.8; /* Increased for better vertical flow */
+  color: var(--carbon);
+  opacity: 0.85;
+}
+
+.dense-text p {
+  margin-bottom: 2.5rem;
+}
+
+/* 6. Structural Separation */
+.section-divider {
+  border: 0;
+  border-top: 1px solid var(--carbon);
+  margin: 6rem 0;
+  opacity: 0.15;
+  width: 100%;
+}
+
+/* 7. Note Entries & 'Hot' Underlines */
+.note {
+  margin-bottom: 5rem;
+  padding-left: 1rem;
+  border-left: 2px solid transparent;
+  transition: border-left 0.3s ease;
+}
+
+.note:hover {
+  border-left: 2px solid var(--carbon); /* Interactive anchor */
+}
+
+.note h3 {
+  font-size: 2.5rem;
+  line-height: 1.4; /* Fixed: Prevents the squashed look */
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.note h3 a {
+  color: var(--carbon);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  text-decoration-skip-ink: auto; /* Premium typography detail */
+  transition: all 0.2s ease;
+}
+
+.note h3 a:hover {
+  background-color: var(--carbon);
+  color: var(--pastel);
+  text-decoration-color: var(--pastel);
+}
+
+/* Functional Tags */
+.tags {
+  display: block;
+  margin-top: 0.6rem; 
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.05rem;
+  color: var(--accent);
   text-transform: uppercase;
 }
 
-footer {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 0.1rem solid #000;
-  font-size: 1.2rem;
-  color: #555;
-}
-
-h1 {
-  font-size: 2.4rem;
-  margin: 2rem 0 1.5rem 0;
-  line-height: 1.2;
-}
-
-h2 {
-  font-size: 2rem;
-  margin: 1.5rem 0 0.2rem 0;
-  line-height: 1.2;
-  text-decoration: underline;
-  color: #000cf1;
-}
-
-p {
-  margin-bottom: 1rem;
-}
-
-.entry-tags {
-  margin: 0.2rem 0 0.3rem 0;
-}
-
-.entry-tags a {
-  text-decoration: underline;
-  color: #000cf1;
-}
-
-.entry-description {
-  margin: 0.2rem 0 0;
-}
-
-article .header {
-  font-size: 1.4rem;
-  font-style: italic;
-  color: #555;
-  margin-bottom: 1rem;
-}
-
-.logo a {
-  font-weight: bold;
-  color: #000;
+.tags a {
+  color: var(--accent);
   text-decoration: none;
 }
 
+.tags a:hover {
+  background-color: var(--carbon);
+  color: var(--pastel);
+  text-decoration-color: var(--pastel);
+}
+
+/* 8. Footer Specifics */
+footer {
+  margin-top: auto;
+}
+
+footer p {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  letter-spacing: 0.15rem;
+}
+
+/* ABOUT PAGE: ASYMMETRIC MANIFESTO */
+.about-manifesto {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr; /* Header/Photo on left, Dense Text on right */
+  gap: 8rem;
+  margin: 4rem 0 10rem 0;
+  align-items: start;
+}
+
+/* THE PHOTO AS A 'REFERENCE ASSET' */
+.reference-asset {
+  margin-top: 4rem;
+}
+
+.reference-asset img {
+  width: 100%;
+  height: auto;
+  filter: grayscale(100%) contrast(110%); /* Stoic/Oleg look */
+  border: 1px solid var(--carbon);
+  padding: 5px;
+  background: white;
+}
+
+.reference-asset figcaption {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  letter-spacing: 0.1rem;
+}
+
+/* DENSE TEXT STYLING */
+.dense-text {
+  font-size: 1.7rem;
+  line-height: 1.8;
+  opacity: 0.9;
+}
+
+.specs {
+  margin-top: 6rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.squiglly {
+  /* This creates the wave */
+  text-decoration: underline wavy var(--accent); 
+  
+  /* Thickness makes it look 'inked' rather than a thin digital line */
+  text-decoration-thickness: 2px; 
+  
+  /* Offset prevents the wave from 'choking' the letters */
+  text-underline-offset: 6px; 
+  
+  /* Ensures the wave is continuous and doesn't break for descenders */
+  text-decoration-skip-ink: none; 
+}
+
+/* Optional: Make it shift color on hover to feel more 'active' */
+.squiglly:hover {
+  text-decoration-color: var(--carbon);
+  transition: text-decoration-color 0.3s ease;
+}
+
+/* CONTACT SPECIFIC STYLING */
+.status-indicator {
+  margin-top: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+}
+
+.endpoint {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.endpoint .label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--carbon);
+}
+
+.endpoint .value a {
+  color: var(--carbon);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.endpoint .value a:hover {
+  background-color: var(--carbon);
+  color: var(--pastel);
+  text-decoration-color: var(--pastel);
+}
+
+/* 1. ANCHOR TAGS (The 'Hot' Underline) */
 a {
-  color: #000cf1;
+  color: var(--carbon);
   text-decoration: underline;
-}
-
-a:link {
-  color: #000cf1;
-  text-decoration: underline;
-}
-
-a:visited {
-  color: #000cf1 !important;
-  text-decoration: underline;
+  /* Thick, intentional underline for premium feel */
+  text-decoration-thickness: 2px; 
+  text-underline-offset: 5px;
+  text-decoration-skip-ink: auto;
+  transition: all 0.2s ease;
 }
 
 a:hover {
-  text-decoration: underline;
+  /* High-contrast invert for the 2026 Genz energy */
+  background-color: var(--carbon);
+  color: var(--pastel);
+  text-decoration-color: var(--pastel);
 }
 
-a:active {
-  color: #000cf1;
-  text-decoration: underline;
+/* 2. LISTS (The Technical Ledger Look) */
+ul, ol {
+  margin: 3rem 0;
+  padding-left: 2.5rem;
+  max-width: 55ch; /* Maintains dense reading width */
 }
 
-
-
-@media (max-width: 319px) {
-  body {
-    width: 90%;
-    margin: 0;
-    padding: 0 5%;
-  }
-  header {
-    margin: 4.2rem 0;
-  }
-  nav {
-    margin: 0 auto 3rem;
-    text-align: center;
-  }
-  footer {
-    text-align: center;
-  }
-  .logo {
-    text-align: center;
-    margin: 1rem auto 3rem;
-  }
-  .logo a {
-    font-size: 2.4rem;
-  }
-  nav a {
-    display: block;
-    line-height: 1.6;
-  }
+li {
+  margin-bottom: 1.5rem;
+  padding-left: 1rem;
+  line-height: 1.8; /* Ensures no 'squashed' text */
 }
 
-@media (min-width: 320px) {
-  body {
-    width: 90%;
-    margin: 0;
-    padding: 0 5%;
-  }
-  header {
-    margin: 4.2rem 0;
-  }
-  nav {
-    margin: 0 auto 3rem;
-    text-align: center;
-  }
-  footer {
-    text-align: center;
-  }
-  .logo {
-    text-align: center;
-    margin: 1rem auto 3rem;
-  }
-  .logo a {
-    font-size: 2.4rem;
-  }
-  nav a {
-    display: inline;
-    margin: 0 0.6rem;
-  }
+/* UNORDERED LISTS: System Dash */
+ul li {
+  list-style: none;
+  position: relative;
 }
 
-@media (min-width: 640px) {
-  body {
-    width: 60rem;
-    margin: 0 auto;
-    padding: 0;
+ul li::before {
+  /* Using a technical dash instead of a bullet for Oleg rigor */
+  content: "—"; 
+  position: absolute;
+  left: -2.5rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+/* ORDERED LISTS: Monospace Counters */
+ol {
+  list-style: none;
+  counter-reset: system-counter;
+}
+
+ol li {
+  counter-increment: system-counter;
+  position: relative;
+}
+
+ol li::before {
+  /* Formats numbers as technical indices (01, 02, etc.) */
+  content: "0" counter(system-counter) ".";
+  position: absolute;
+  left: -4rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.1rem;
+}
+
+/* CODE SPECIFICATION // IMPLEMENTATION FIDELITY */
+
+/* 1. THE CONTAINER */
+div.sourceCode {
+  margin: 4rem 0;
+  background-color: var(--carbon); /* High-contrast terminal look */
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* 2. THE PRE/CODE BLOCK */
+pre.sourceCode {
+  padding: 2.5rem;
+  margin: 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  line-height: 1.5;
+  color: var(--pastel); /* Light text on dark background */
+}
+
+/* 3. SYSTEM LABEL (Top Right) */
+div.sourceCode::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255,255,255,0.05);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--accent);
+  letter-spacing: 0.1rem;
+  border-bottom-left-radius: 2px;
+}
+
+/* 4. SYNTX HIGHLIGHTING (Oleg Grayscale) */
+code.sourceCode .kw { color: #ffffff; font-weight: 700; } /* Keywords */
+code.sourceCode .dt { color: var(--accent); }             /* Datatypes */
+code.sourceCode .ot { color: #d1d1d1; }                   /* Other/TypeSigs */
+code.sourceCode .st { color: #a8ffdb; opacity: 0.8; }     /* Strings (subtle tint) */
+code.sourceCode .co { color: #666; font-style: italic; }  /* Comments */
+code.sourceCode .fu { color: #ffffff; }                   /* Functions */
+
+/* 5. LINE ANCHORS (Hover Effect) */
+span[id^="cb"] a {
+  text-decoration: none;
+  color: #444;
+  user-select: none;
+  margin-right: 1.5rem;
+}
+
+span[id^="cb"]:hover {
+  background-color: rgba(255,255,255,0.03);
+}
+
+/* SYSTEM CHANGELOG // LEDGER STYLE */
+
+/* 1. THE LOG HEADER */
+h1.log-entry {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  letter-spacing: 0.15rem;
+  color: var(--accent);
+  padding: 1.5rem 0;
+  border-bottom: 2px solid var(--carbon);
+  margin-top: 6rem;
+}
+
+/* 2. DEFINITION LISTS (The Logic) */
+dl {
+  display: grid;
+  grid-template-columns: 1fr 2.5fr; /* Asymmetric weight */
+  gap: 4rem;
+  margin: 3rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding-bottom: 3rem;
+}
+
+/* THE LABEL (Migration, Initialization) */
+dt {
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.2rem;
+  color: var(--carbon);
+}
+
+/* THE DESCRIPTION */
+dd {
+  font-size: 1.6rem;
+  line-height: 1.8;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* 3. INTERACTIVE 'HOT' UNDERLINES IN DD */
+dd strong {
+  text-decoration: underline wavy var(--accent);
+  text-underline-offset: 4px;
+}
+
+/* FOOTER SYSTEM LOG */
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline; /* Ensures perfect horizontal alignment */
+  max-width: var(--width);
+  margin: 0 auto;
+  padding: 0 2.5rem;
+}
+
+.footer-inner p {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.15rem;
+  opacity: 0.6;
+}
+
+/* THE CHANGELOG LINK (System Marker) */
+.changelog_footer {
+  color: var(--pastel);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent); /* Subtle technical underline */
+  padding-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+.changelog_footer:hover {
+  border-bottom: 1px solid var(--pastel);
+  opacity: 1;
+  color: #ffffff; /* Subtle 'Active Green' hint for 2026 vibe */
+}
+
+.system-status time {
+  margin-left: 1.5rem;
+  color: var(--accent);
+}
+
+/* 9. Mobile Optimization */
+@media (max-width: 768px) {
+  header, footer { padding: 2rem 0; }
+  
+  .nav-inner, .footer-inner {
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
   }
-  header {
-    margin: 0 0 3rem;
-    padding: 1.2rem 0;
+  
+  nav { gap: 2rem; }
+  
+  .about-manifesto {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    margin: 4rem 0;
   }
-  nav {
-    margin: 0;
-    text-align: right;
-  }
-  nav a {
-    margin: 0 0 0 1.2rem;
-    display: inline;
-  }
-  footer {
-    text-align: right;
-  }
-  .logo {
-    margin: 0;
-    text-align: left;
-  }
-  .logo a {
-    float: left;
-    font-size: 1.8rem;
-  }
+  .about-manifesto { grid-template-columns: 1fr; gap: 4rem; }
+  .about-manifesto h1 { font-size: 3.2rem; }
 }

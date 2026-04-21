@@ -1,32 +1,15 @@
 {% extends "base.html" %}
-
-{% block navbar %}
-{% if navbar %}
-<nav>
-    {% for link in navbar %}
-    <a href="../{{ link.path }}">{{ link.title }}</a>
-    {% endfor %}
-</nav>
-{% endif %}
-{% endblock %}
-
 {% block content %}
-<article>
-    {% if not navbar %}
-    <h1>{{ title }}</h1>
-    {% endif %}
-    
-    
-    <div class="content">
-        {{ content | safe }}
-    </div>
-    
-    
+<main class="main-container">
+  <article>
+    {{ body | safe }}
+    {% if tags %}
     <div class="tags">
-        {% for tag in tags %}
-        <span class="tag">{{ tag }}</span>
-        {% endfor %}
+      {% for tag in tags %}
+      <a href="{{ css_path | replace("style.css","") }}tags/{{ tag }}.html" class="tag-link">{{ tag }}</a>
+      {% endfor %}
     </div>
-    
-</article>
+    {% endif %}
+  </article>
+</main>
 {% endblock %}

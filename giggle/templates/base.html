@@ -1,228 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ title }}{% endblock %}</title>
-    <style>
-html {
-  font-size: 62.5%;
-}
-
-body {
-  font-size: 1.6rem;
-  color: #000;
-  line-height: 1.6;
-}
-
-header {
-  border-bottom: 0.1rem solid #000;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-}
-
-nav {
-  text-align: right;
-}
-
-nav a {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: black;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-footer {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 0.1rem solid #000;
-  font-size: 1.2rem;
-  color: #555;
-}
-
-h1 {
-  font-size: 2.4rem;
-  margin: 2rem 0 1.5rem 0;
-  line-height: 1.2;
-}
-
-h2 {
-  font-size: 2rem;
-  margin: 1.5rem 0 0.2rem 0;
-  line-height: 1.2;
-  text-decoration: underline;
-  color: #000cf1;
-}
-
-p {
-  margin-bottom: 1rem;
-}
-
-.entry-tags {
-  margin: 0.2rem 0 0.3rem 0;
-}
-
-.entry-tags a {
-  text-decoration: underline;
-  color: #000cf1;
-}
-
-.entry-description {
-  margin: 0.2rem 0 0;
-}
-
-article .header {
-  font-size: 1.4rem;
-  font-style: italic;
-  color: #555;
-  margin-bottom: 1rem;
-}
-
-.logo a {
-  font-weight: bold;
-  color: #000;
-  text-decoration: none;
-}
-
-a {
-  color: #000cf1;
-  text-decoration: underline;
-}
-
-a:link {
-  color: #000cf1;
-  text-decoration: underline;
-}
-
-a:visited {
-  color: #000cf1 !important;
-  text-decoration: underline;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-a:active {
-  color: #000cf1;
-  text-decoration: underline;
-}
-
-
-
-@media (max-width: 319px) {
-  body {
-    width: 90%;
-    margin: 0;
-    padding: 0 5%;
-  }
-  header {
-    margin: 4.2rem 0;
-  }
-  nav {
-    margin: 0 auto 3rem;
-    text-align: center;
-  }
-  footer {
-    text-align: center;
-  }
-  .logo {
-    text-align: center;
-    margin: 1rem auto 3rem;
-  }
-  .logo a {
-    font-size: 2.4rem;
-  }
-  nav a {
-    display: block;
-    line-height: 1.6;
-  }
-}
-
-@media (min-width: 320px) {
-  body {
-    width: 90%;
-    margin: 0;
-    padding: 0 5%;
-  }
-  header {
-    margin: 4.2rem 0;
-  }
-  nav {
-    margin: 0 auto 3rem;
-    text-align: center;
-  }
-  footer {
-    text-align: center;
-  }
-  .logo {
-    text-align: center;
-    margin: 1rem auto 3rem;
-  }
-  .logo a {
-    font-size: 2.4rem;
-  }
-  nav a {
-    display: inline;
-    margin: 0 0.6rem;
-  }
-}
-
-@media (min-width: 640px) {
-  body {
-    width: 60rem;
-    margin: 0 auto;
-    padding: 0;
-  }
-  header {
-    margin: 0 0 3rem;
-    padding: 1.2rem 0;
-  }
-  nav {
-    margin: 0;
-    text-align: right;
-  }
-  nav a {
-    margin: 0 0 0 1.2rem;
-    display: inline;
-  }
-  footer {
-    text-align: right;
-  }
-  .logo {
-    margin: 0;
-    text-align: left;
-  }
-  .logo a {
-    float: left;
-    font-size: 1.8rem;
-  }
-}
-
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ title }}{% endblock %} — {{ site_title }}</title>
+  <link rel="stylesheet" href="{{ css_path }}">
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [["$","$"],["\\(","\\)"]],
+        displayMath: [["$$","$$"],["\\[","\\]"]]
+      }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-    <header>
-        <div class="logo"><a href="index.html" style="text-decoration: none; color: #000;">{{ site_title | default('Archive') }}</a></div>
-        {% block navbar %}{% endblock %}
-    </header>
-    {% block content %}{% endblock %}
-    <script>
-      MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
-        }
-      };
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <footer>
-        <p>Updated: <span id="timestamp"></span></p>
-        <script>
-            document.getElementById('timestamp').textContent = new Date().toLocaleString();
-        </script>
-    </footer>
+<header>
+  <div class="nav-inner">
+    <div class="logo"><a href="/">{{ site_title }}</a></div>
+    {% if navbar %}
+    <nav>
+      {% for link in navbar %}
+        {% if link.url %}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {% else %}
+          <a href="/{{ link.path }}">{{ link.title }}</a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+    {% endif %}
+  </div>
+</header>
+{% block content %}{% endblock %}
+<footer>
+  <div class="footer-inner">
+    <p>{{ site_title }}</p>
+  </div>
+</footer>
 </body>
 </html>

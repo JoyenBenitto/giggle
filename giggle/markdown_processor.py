@@ -34,17 +34,19 @@ def copy_markdown_files(src_dir: str, dest_dir: str) -> list[str]:
     return copied_files
 
 def copy_images(src_dir: str, dest_dir: str) -> None:
-    """Copy all images to common assets directory."""
+    """Copy all images preserving subdirectory structure under assets/."""
     assets_dir: str = os.path.join(dest_dir, 'assets')
     os.makedirs(assets_dir, exist_ok=True)
-    
+
     image_extensions: tuple = ('.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp')
-    
+
     for root, dirs, files in os.walk(src_dir):
         for file in files:
             if file.lower().endswith(image_extensions):
                 src_path: str = os.path.join(root, file)
-                dest_path: str = os.path.join(assets_dir, file)
+                rel_path: str = os.path.relpath(src_path, src_dir)
+                dest_path: str = os.path.join(assets_dir, rel_path)
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
                 shutil.copy2(src_path, dest_path)
 
 def resolve_obsidian_links(content: str, from_page: PagePath, path_resolver: PathResolver) -> str:
@@ -59,43 +61,45 @@ def resolve_obsidian_links(content: str, from_page: PagePath, path_resolver: Pat
         rel_link: Optional[str] = path_resolver.compute_link(from_page, link_name)
         if rel_link:
             return f'[{display_text}]({rel_link})'
-        return f'[{display_text}](#)'
+        print(f"  Warning: broken link [[{link_name}]] in {from_page.rel_path} — skipping")
+        return display_text
     
     pattern = re.compile(r'\[\[([^\]]+)\]\]')
     return pattern.sub(replace_link, content)
 
+def _assets_prefix(rel_dir: str) -> str:
+    """Return the relative path prefix to the build-root assets/ dir."""
+    if rel_dir and rel_dir != '.':
+        depth: int = rel_dir.count('/') + 1
+        return '/'.join(['..'] * depth) + '/assets/'
+    return 'assets/'
+
+
 def resolve_obsidian_images(content: str, rel_dir: str = '') -> str:
-    """Convert Obsidian image syntax ![[filename]] to markdown with asset paths."""
-    
+    """Convert Obsidian ![[image]] syntax to standard markdown using assets/ path."""
+    prefix: str = _assets_prefix(rel_dir)
+
     def replace_obsidian_img(match) -> str:
         filename: str = match.group(1)
-        
-        if rel_dir and rel_dir != '.':
-            depth: int = rel_dir.count('/')
-            assets_path: str = '/'.join(['..'] * (depth + 1)) + '/assets/' + filename
-        else:
-            assets_path: str = 'assets/' + filename
-        
-        return f'![{filename}]({assets_path})'
-    
+        return f'![{filename}]({prefix}{rel_dir}/{filename})'
+
     pattern = re.compile(r'!\[\[([^\]]+)\]\]')
     return pattern.sub(replace_obsidian_img, content)
 
+
 def resolve_image_paths(content: str, rel_dir: str = '') -> str:
-    """Resolve image paths to common assets directory with proper relative paths."""
-    
+    """Rewrite standard markdown image paths to point into assets/ subdir."""
+    prefix: str = _assets_prefix(rel_dir)
+
     def replace_img(match) -> str:
-        img_path: str = match.group(1)
-        filename: str = os.path.basename(img_path)
-        
-        if rel_dir and rel_dir != '.':
-            depth: int = rel_dir.count('/')
-            assets_path: str = '/'.join(['..'] * (depth + 1)) + '/assets/' + filename
-        else:
-            assets_path: str = 'assets/' + filename
-        
-        return f'![{match.group(2)}]({assets_path})'
-    
+        alt: str = match.group(1)
+        img_path: str = match.group(2)
+        # preserve already-absolute or already-assets paths
+        if img_path.startswith(('http://', 'https://', '/', 'assets/')):
+            return match.group(0)
+        rel_img: str = f"{rel_dir}/{img_path}" if rel_dir else img_path
+        return f'![{alt}]({prefix}{rel_img})'
+
     pattern = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
     return pattern.sub(replace_img, content)
 
