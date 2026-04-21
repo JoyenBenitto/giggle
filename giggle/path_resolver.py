@@ -57,8 +57,7 @@ class PathResolver:
         if rel_dir == '.':
             rel_dir = ''
 
-        is_index: bool = title.lower() == 'index'
-        final_html_name: str = 'index.html' if (is_index and rel_dir) else html_name
+        final_html_name: str = html_name
 
         page: PagePath = PagePath(
             title=title,

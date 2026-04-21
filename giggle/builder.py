@@ -79,7 +79,8 @@ class Builder:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         post = frontmatter.load(f)
                     title: str = post.metadata.get('title', os.path.splitext(file)[0])
-                    html_name: str = self._get_html_name(title)
+                    is_index: bool = post.metadata.get('is_index', False)
+                    html_name: str = 'index.html' if is_index else self._get_html_name(title)
                     self.path_resolver.register_page(file_path, title, html_name, self.temp_dir)
 
     def _copy_images(self) -> None:
