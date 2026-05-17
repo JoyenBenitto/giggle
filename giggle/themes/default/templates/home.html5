@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="$lang$">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$site-title$$if(tagline)$ · $tagline$$endif$</title>
+  <meta name="description" content="$if(description)$$description$$else$$site-description$$endif$">
+  <meta property="og:title" content="$site-title$">
+  <meta property="og:description" content="$if(description)$$description$$else$$site-description$$endif$">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="$site-url$">
+  $if(twitter)$<meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="$twitter$">$endif$
+  <link rel="canonical" href="$site-url$">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="feed.rss">
+  <link rel="alternate" type="application/atom+xml" title="Atom" href="feed.atom">
+  <link rel="stylesheet" href="assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "$site-author$",
+    "url": "$site-url$",
+    "description": "$site-description$"
+  }
+  </script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="site-nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-container">
+    <a class="nav-brand" href="index.html">$site-title$</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+$for(nav)$      <li><a href="$nav.href$"$if(nav.active)$ class="active" aria-current="page"$endif$>$nav.title$</a></li>
+$endfor$    </ul>
+  </div>
+</nav>
+
+<main id="main">
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-inner">
+      <div class="hero-prompt">whoami</div>
+      <h1 class="hero-name">$if(hero)$$hero$$else$$site-title$$endif$</h1>
+      $if(tagline)$<p class="hero-tagline">$tagline$</p>$endif$
+    </div>
+  </section>
+
+  <div class="home-content content-wrap">
+    <div class="prose">
+$body$
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <span>&copy; $year$ $site-author$</span>
+    <span class="footer-feeds">
+      <a href="feed.rss">RSS</a>
+      <a href="feed.atom">Atom</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.querySelector('.nav-links');
+  if (toggle) toggle.addEventListener('click', () => {
+    const open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open);
+  });
+</script>
+</body>
+</html>

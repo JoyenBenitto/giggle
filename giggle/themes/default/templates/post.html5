@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="$lang$">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$if(title)$$title$ · $endif$$site-title$</title>
+  $if(description)$<meta name="description" content="$description$">$endif$
+  <meta property="og:title" content="$if(title)$$title$$else$$site-title$$endif$">
+  $if(description)$<meta property="og:description" content="$description$">$endif$
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="$canonical$">
+  $if(twitter)$<meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="$twitter$">$endif$
+  <link rel="canonical" href="$canonical$">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="$rss-url$">
+  <link rel="alternate" type="application/atom+xml" title="Atom" href="$atom-url$">
+  <link rel="stylesheet" href="$root$assets/style.css">
+  $if(math)$$math$$endif$
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav class="site-nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-container">
+    <a class="nav-brand" href="$root$index.html">$site-title$</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+$for(nav)$      <li><a href="$root$$nav.href$"$if(nav.active)$ class="active" aria-current="page"$endif$>$nav.title$</a></li>
+$endfor$    </ul>
+  </div>
+</nav>
+
+<main class="page-main" id="main">
+  <article class="content-wrap">
+    <header class="post-header">
+      <h1 class="post-title">$title$</h1>
+      <div class="post-meta">
+        $if(date)$<time class="post-date" datetime="$date$">$date$</time>$endif$
+        $if(site-author)$<span class="post-author">$site-author$</span>$endif$
+      </div>
+      $if(description)$<p class="post-desc">$description$</p>$endif$
+      $if(tags)$<div class="page-tags post-tags">$for(tags)$<a class="tag" href="$root$tags/$tags$.html">$tags$</a>$endfor$</div>$endif$
+    </header>
+    <div class="prose">
+$body$
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <span>&copy; $year$ $site-author$</span>
+    <span class="footer-feeds">
+      <a href="$root$feed.rss">RSS</a>
+      <a href="$root$feed.atom">Atom</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.querySelector('.nav-links');
+  if (toggle) toggle.addEventListener('click', () => {
+    const open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open);
+  });
+</script>
+</body>
+</html>

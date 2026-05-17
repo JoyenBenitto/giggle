@@ -1,0 +1,22 @@
+/* ============================================================
+   giggle — dark theme
+   Imports default then overrides custom properties.
+   ============================================================ */
+
+@import url("../../../default/assets/style.css");
+
+:root {
+  --bg:           #0f172a;
+  --surface:      #1e293b;
+  --border:       #334155;
+  --text:         #e2e8f0;
+  --text-muted:   #94a3b8;
+  --accent:       #60a5fa;
+  --accent-hover: #93c5fd;
+  --code-bg:      #1e293b;
+  --code-text:    #cbd5e1;
+  --tag-bg:       #1e3a5f;
+  --tag-text:     #93c5fd;
+  --nav-bg:       #0f172a;
+  --nav-border:   #1e293b;
+}

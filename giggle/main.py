@@ -1,35 +1,66 @@
+from __future__ import annotations
+from pathlib import Path
 import sys
-import os
-from argparse import ArgumentParser
+import click
 from .builder import Builder
-from . import __version__
 
-def main() -> None:
-    """Main entry point for Giggle static site generator."""
-    parser: ArgumentParser = ArgumentParser(description="Giggle - Static site generator")
-    
-    parser.add_argument("-v", "--version",
-                        action="version",
-                        version=f"%(prog)s {__version__}")
-    
-    parser.add_argument("-s", "--source",
-                        help="Path to the vault directory",
-                        required=True)
-    
-    parser.add_argument("-o", "--output",
-                        help="Path to the output directory",
-                        default="./build")
-    
-    parser.add_argument("-c", "--config",
-                        help="Path to site configuration YAML file",
-                        default=None)
-    
-    args = parser.parse_args()
-    
-    vault_root: str = os.path.dirname(args.source)
-    builder: Builder = Builder(args.source, args.output, vault_root, args.config)
-    success: bool = builder.build()
-    sys.exit(0 if success else 1)
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.option("-c", "--config", default="site.yaml", show_default=True, help="Path to site.yaml")
+@click.option("-o", "--output", default="dist", show_default=True, help="Output directory")
+def build(config: str, output: str):
+    """Build the static site."""
+    config_path = Path(config).resolve()
+    output_path = Path(output).resolve()
+
+    try:
+        builder = Builder(config_path, output_path)
+        builder.build()
+    except FileNotFoundError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Build failed: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command()
+@click.option("-c", "--config", default="site.yaml", show_default=True)
+@click.option("-o", "--output", default="dist", show_default=True)
+@click.option("-p", "--port", default=8000, show_default=True)
+def serve(config: str, output: str, port: int):
+    """Build and serve locally with live reload."""
+    import http.server
+    import os
+
+    config_path = Path(config).resolve()
+    output_path = Path(output).resolve()
+
+    try:
+        builder = Builder(config_path, output_path)
+        builder.build()
+    except Exception as e:
+        click.echo(f"Build failed: {e}", err=True)
+        sys.exit(1)
+
+    os.chdir(output_path)
+    handler = http.server.SimpleHTTPRequestHandler
+    httpd = http.server.HTTPServer(("", port), handler)
+    click.echo(f"Serving at http://localhost:{port}")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+
+def main():
+    cli()
+
 
 if __name__ == "__main__":
     main()
