@@ -43,7 +43,6 @@ $endfor$    </ul>
 <main id="main">
   <section class="hero" aria-label="Introduction">
     <div class="hero-inner">
-      <div class="hero-prompt">whoami</div>
       <h1 class="hero-name">$if(hero)$$hero$$else$$site-title$$endif$</h1>
       $if(tagline)$<p class="hero-tagline">$tagline$</p>$endif$
     </div>
@@ -58,10 +57,10 @@ $body$
 
 <footer class="site-footer" role="contentinfo">
   <div class="footer-inner">
-    <span>&copy; $year$ $site-author$</span>
+    <span class="footer-loop">loop ∞ &nbsp;·&nbsp; $site-title$</span>
     <span class="footer-feeds">
-      <a href="feed.rss">RSS</a>
-      <a href="feed.atom">Atom</a>
+      <a href="feed.rss">rss</a>
+      <a href="feed.atom">atom</a>
     </span>
   </div>
 </footer>

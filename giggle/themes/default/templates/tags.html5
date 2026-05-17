@@ -33,7 +33,7 @@ $endfor$    </ul>
     <header class="page-header">
       <h1 class="page-title">$title$</h1>
     </header>
-    <div class="tags-content">
+    <div class="prose listing-prose tag-listing tags-content">
 $body$
     </div>
   </div>
@@ -41,10 +41,10 @@ $body$
 
 <footer class="site-footer" role="contentinfo">
   <div class="footer-inner">
-    <span>&copy; $year$ $site-author$</span>
+    <span class="footer-loop">loop ∞ &nbsp;·&nbsp; $site-title$</span>
     <span class="footer-feeds">
-      <a href="$root$feed.rss">RSS</a>
-      <a href="$root$feed.atom">Atom</a>
+      <a href="$root$feed.rss">rss</a>
+      <a href="$root$feed.atom">atom</a>
     </span>
   </div>
 </footer>
