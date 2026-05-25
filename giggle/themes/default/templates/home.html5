@@ -57,7 +57,7 @@ $body$
 
 <footer class="site-footer" role="contentinfo">
   <div class="footer-inner">
-    <span class="footer-loop">loop ∞ &nbsp;·&nbsp; $site-title$</span>
+    <span class="footer-loop">$site-title$</span>
     <span class="footer-feeds">
       <a href="feed.rss">rss</a>
       <a href="feed.atom">atom</a>
