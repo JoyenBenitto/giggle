@@ -14,6 +14,7 @@ from .config import SiteConfig, PageConfig, CollectionConfig
 from .pandoc_runner import run_pandoc, run_pandoc_string, run_pandoc_pdf
 from .feeds import FeedItem, generate_rss, generate_atom
 from .sitemap import generate_sitemap
+from .shortcodes import expand_shortcodes
 from .themes import resolve_theme, get_template
 
 console = Console()
@@ -125,6 +126,22 @@ class Builder:
                 self._page_registry[str(rel.with_suffix(""))] = out
                 self._page_registry[source.stem] = out
 
+    def _prepare_source(self, source: Path) -> tuple[Path, Path, Path | None]:
+        """Expands shortcodes ({{download ...}}) in markdown sources. Returns
+        (path_to_pass_to_pandoc, resource_path_for_relative_links, tempfile_to_clean_up_or_None)."""
+        if source.suffix.lower() != ".md":
+            return source, source.parent, None
+
+        text = source.read_text(encoding="utf-8")
+        expanded = expand_shortcodes(text, self.config.downloads, self.root_dir / "content")
+        if expanded == text:
+            return source, source.parent, None
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False, encoding="utf-8") as f:
+            f.write(expanded)
+            tmp = Path(f.name)
+        return tmp, source.parent, tmp
+
     def _check_is_pdf(self, source: Path) -> bool:
         if source.suffix.lower() == ".tex":
             return True
@@ -164,7 +181,12 @@ class Builder:
             template_name = page.template if page.template else "page"
             template = get_template(self.theme_dir, template_name)
 
-            html = run_pandoc(source, template, metadata)
+            pandoc_source, resource_path, tmp = self._prepare_source(source)
+            try:
+                html = run_pandoc(pandoc_source, template, metadata, resource_path=resource_path)
+            finally:
+                if tmp is not None:
+                    tmp.unlink(missing_ok=True)
             html = self._resolve_crossrefs(html, root)
             output_path.write_text(html, encoding="utf-8")
 
@@ -274,13 +296,18 @@ class Builder:
                 template = get_template(self.theme_dir, collection.item_template)
                 metadata = self._build_metadata(fake_page, fm, root, canonical,
                                                 active_href=f"{collection.output_dir}/index.html")
+                tmp = None
                 try:
-                    html = run_pandoc(source, template, metadata)
+                    pandoc_source, resource_path, tmp = self._prepare_source(source)
+                    html = run_pandoc(pandoc_source, template, metadata, resource_path=resource_path)
                     html = self._resolve_crossrefs(html, root)
                     output_path.write_text(html, encoding="utf-8")
                     status = "[green]ok[/green]"
                 except Exception as e:
                     status = f"[red]{e}[/red]"
+                finally:
+                    if tmp is not None:
+                        tmp.unlink(missing_ok=True)
 
             if not is_index and "ok" in status or "pdf" in status:
                 if not is_index:

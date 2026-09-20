@@ -52,6 +52,13 @@ class SEOConfig:
 
 
 @dataclass
+class DownloadEntry:
+    href: str
+    label: str = "Download"
+    desc: str = ""
+
+
+@dataclass
 class SiteInfo:
     title: str
     author: str
@@ -70,6 +77,7 @@ class SiteConfig:
     collections: list = field(default_factory=list)
     feeds: FeedsConfig = field(default_factory=FeedsConfig)
     seo: SEOConfig = field(default_factory=SEOConfig)
+    downloads: dict = field(default_factory=dict)  # id -> DownloadEntry
 
     @classmethod
     def load(cls, path: Path | str) -> SiteConfig:
@@ -113,6 +121,10 @@ class SiteConfig:
         seo_data = data.get("seo", {})
         seo = SEOConfig(**seo_data) if seo_data else SEOConfig()
 
+        downloads = {
+            did: DownloadEntry(**dd) for did, dd in (data.get("downloads", {}) or {}).items()
+        }
+
         return cls(
             site=site,
             navbar=navbar,
@@ -120,4 +132,5 @@ class SiteConfig:
             collections=collections,
             feeds=feeds,
             seo=seo,
+            downloads=downloads,
         )

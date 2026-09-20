@@ -12,7 +12,8 @@ def detect_format(path: Path) -> str:
     return SUPPORTED_FORMATS.get(path.suffix.lower(), "markdown")
 
 
-def run_pandoc(source: Path, template: Path, metadata: dict, extra_args: list | None = None) -> str:
+def run_pandoc(source: Path, template: Path, metadata: dict, extra_args: list | None = None,
+               resource_path: Path | None = None) -> str:
     source_fmt = detect_format(source)
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
@@ -29,7 +30,7 @@ def run_pandoc(source: Path, template: Path, metadata: dict, extra_args: list | 
             f"--template={template}",
             f"--metadata-file={meta_file}",
             "--highlight-style=kate",
-            f"--resource-path={source.parent}",
+            f"--resource-path={resource_path if resource_path is not None else source.parent}",
         ]
         if metadata.get("math"):
             cmd.append("--mathjax")
